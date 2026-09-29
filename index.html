@@ -1,0 +1,166 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Evolve Alerts</title>
+<meta name="description" content="Avisos de Claude Code para el equipo de Evolve Digital.">
+<meta name="theme-color" content="#2c5c65">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="iconos/favicon-32.png">
+<link rel="apple-touch-icon" href="iconos/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Evolve Alerts">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<style>
+  :root { --naranja:#ff6b00; --petroleo:#2c5c65; --tinta:#1d2b2f; --suave:#5d6f73; --fondo:#f6f7f7; --linea:#dfe5e6; --ok:#1f7a4d; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color:var(--tinta); background:var(--fondo);
+         padding:max(24px, env(safe-area-inset-top)) 20px max(32px, env(safe-area-inset-bottom)); }
+  main { max-width:440px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
+  header { display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; padding-top:8px; }
+  header img { width:220px; max-width:100%; height:auto; }
+  h1 { font-size:22px; margin:0; color:var(--petroleo); letter-spacing:.2px; }
+  .sub { margin:0; color:var(--suave); font-size:15px; }
+  .tarjeta { background:#fff; border:1px solid var(--linea); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:14px; }
+  .tarjeta h2 { margin:0; font-size:17px; }
+  ol { margin:0; padding-left:22px; display:flex; flex-direction:column; gap:8px; }
+  label { font-size:14px; color:var(--suave); display:flex; flex-direction:column; gap:6px; }
+  input, textarea { font:inherit; border:1px solid var(--linea); border-radius:10px; padding:12px; width:100%; background:#fff; color:var(--tinta); }
+  textarea { font:13px/1.4 ui-monospace, Menlo, monospace; min-height:120px; resize:vertical; word-break:break-all; }
+  button { font:inherit; font-weight:600; border:0; border-radius:12px; padding:14px 16px; cursor:pointer; background:var(--naranja); color:#fff; }
+  button.secundario { background:#fff; color:var(--petroleo); border:1px solid var(--petroleo); }
+  button:disabled { opacity:.55; cursor:default; }
+  button:focus-visible, input:focus-visible, textarea:focus-visible { outline:3px solid rgba(255,107,0,.35); outline-offset:2px; }
+  .fila { display:flex; gap:10px; flex-wrap:wrap; } .fila button { flex:1 1 140px; }
+  .estado { font-size:14px; padding:10px 12px; border-radius:10px; background:#eef3f3; color:var(--petroleo); }
+  .estado.ok { background:#e7f4ec; color:var(--ok); } .estado.mal { background:#fdeceb; color:#a0322b; }
+  .nota { font-size:13px; color:var(--suave); margin:0; }
+  [hidden] { display:none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <img src="iconos/evolve-horizontal.png" alt="Evolve Digital">
+    <h1>Evolve Alerts</h1>
+    <p class="sub">Te avisa en este teléfono cuando Claude Code termina o te pide permiso.</p>
+  </header>
+
+  <section class="tarjeta" id="paso-instalar" hidden>
+    <h2>Primero, instálala en tu pantalla de inicio</h2>
+    <ol>
+      <li>Abre esta página en <strong>Safari</strong>.</li>
+      <li>Toca el botón <strong>Compartir</strong> (el cuadro con la flecha hacia arriba).</li>
+      <li>Elige <strong>Agregar a inicio</strong> y confirma.</li>
+      <li>Abre <strong>Evolve Alerts</strong> desde el ícono nuevo.</li>
+    </ol>
+    <p class="nota">El iPhone sólo deja recibir notificaciones a las apps abiertas desde la pantalla de inicio, con iOS 16.4 o más nuevo.</p>
+  </section>
+
+  <section class="tarjeta" id="paso-activar" hidden>
+    <h2>Activa los avisos</h2>
+    <label for="nombre">¿Cómo se llama este teléfono?
+      <input id="nombre" type="text" placeholder="Ej. iPhone de Roberto" autocomplete="off">
+    </label>
+    <button id="activar" type="button">Activar notificaciones</button>
+    <div class="estado" id="estado" role="status" hidden></div>
+  </section>
+
+  <section class="tarjeta" id="paso-codigo" hidden>
+    <h2>Tu código de suscripción</h2>
+    <p class="nota">Pégalo en el instalador de tu PC. Es personal: quien lo tenga puede mandarte avisos.</p>
+    <label for="codigo">Código
+      <textarea id="codigo" readonly></textarea>
+    </label>
+    <div class="fila">
+      <button id="copiar" type="button">Copiar código</button>
+      <button id="compartir" class="secundario" type="button">Enviar a mi PC</button>
+    </div>
+  </section>
+
+  <section class="tarjeta" id="sin-soporte" hidden>
+    <h2>Este navegador no puede recibir avisos</h2>
+    <p class="nota" id="sin-soporte-texto"></p>
+  </section>
+</main>
+
+<script>
+const LLAVE_PUBLICA = 'BNUvOsxj2KfuEPleOp46DX_1iU0cxPmxDDw4ObwvnVVVquwtF9-g03ppLCURFgpVM4kilXIMt1yDDyAXzG-cY4o';
+const $ = (id) => document.getElementById(id);
+const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const instalada = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
+const hayPush = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+
+function aBytes(b64) {
+  const relleno = '='.repeat((4 - b64.length % 4) % 4);
+  const bin = atob((b64 + relleno).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(bin, (c) => c.charCodeAt(0));
+}
+function aCodigo(obj) {
+  const bytes = new TextEncoder().encode(JSON.stringify(obj));
+  let bin = ''; bytes.forEach((b) => { bin += String.fromCharCode(b); });
+  return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+}
+function estado(texto, tipo) { const e = $('estado'); e.hidden = false; e.textContent = texto; e.className = 'estado' + (tipo ? ' ' + tipo : ''); }
+function mostrarCodigo(sub) {
+  const nombre = ($('nombre').value || '').trim() || 'mi teléfono';
+  $('codigo').value = aCodigo({ nombre, suscripcion: sub.toJSON ? sub.toJSON() : sub });
+  $('paso-codigo').hidden = false;
+  try { localStorage.setItem('evolve-alerts-nombre', nombre); } catch {}
+}
+
+async function iniciar() {
+  try { $('nombre').value = localStorage.getItem('evolve-alerts-nombre') || ''; } catch {}
+  if (esIOS && !instalada) { $('paso-instalar').hidden = false; return; }
+  if (!hayPush) {
+    $('sin-soporte').hidden = false;
+    $('sin-soporte-texto').textContent = esIOS
+      ? 'Actualiza tu iPhone a iOS 16.4 o más nuevo y abre la app desde la pantalla de inicio.'
+      : 'Prueba con Chrome en Android, o con Safari en iPhone desde la pantalla de inicio.';
+    return;
+  }
+  $('paso-activar').hidden = false;
+  const registro = await navigator.serviceWorker.register('sw.js');
+  const actual = await registro.pushManager.getSubscription();
+  if (actual && Notification.permission === 'granted') {
+    estado('Los avisos ya están activos en este teléfono.', 'ok');
+    $('activar').textContent = 'Volver a generar el código';
+    mostrarCodigo(actual);
+  }
+}
+
+$('activar').addEventListener('click', async () => {
+  $('activar').disabled = true;
+  try {
+    const permiso = await Notification.requestPermission();
+    if (permiso !== 'granted') {
+      estado('No diste permiso de notificaciones. Actívalo en Ajustes, Notificaciones, Evolve Alerts, y vuelve a intentar.', 'mal');
+      return;
+    }
+    const registro = await navigator.serviceWorker.ready;
+    let sub = await registro.pushManager.getSubscription();
+    if (!sub) sub = await registro.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: aBytes(LLAVE_PUBLICA) });
+    estado('Listo. Ahora copia tu código y pégalo en tu PC.', 'ok');
+    mostrarCodigo(sub);
+  } catch (e) {
+    estado('No se pudo activar: ' + (e && e.message ? e.message : e), 'mal');
+  } finally { $('activar').disabled = false; }
+});
+
+$('copiar').addEventListener('click', async () => {
+  const t = $('codigo').value;
+  try { await navigator.clipboard.writeText(t); } catch { $('codigo').select(); document.execCommand('copy'); }
+  $('copiar').textContent = 'Copiado';
+  setTimeout(() => { $('copiar').textContent = 'Copiar código'; }, 2000);
+});
+$('compartir').addEventListener('click', async () => {
+  const t = $('codigo').value;
+  if (navigator.share) { try { await navigator.share({ title: 'Código de Evolve Alerts', text: t }); } catch {} }
+  else { $('copiar').click(); }
+});
+
+iniciar().catch((e) => estado('Error al iniciar: ' + e.message, 'mal'));
+</script>
+</body>
+</html>
