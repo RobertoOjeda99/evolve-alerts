@@ -13,13 +13,18 @@
 <meta name="apple-mobile-web-app-title" content="Evolve Alerts">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
-  :root { --naranja:#ff6b00; --petroleo:#2c5c65; --tinta:#1d2b2f; --suave:#5d6f73; --fondo:#f6f7f7; --linea:#dfe5e6; --ok:#1f7a4d; }
+  :root { --naranja:#ff6b00; --naranja-suave:#fff1e6; --petroleo:#2c5c65; --tinta:#1d2b2f; --suave:#5d6f73; --fondo:#f6f7f7; --linea:#dfe5e6; --ok:#1f7a4d; }
   * { box-sizing:border-box; }
   body { margin:0; font:16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color:var(--tinta); background:var(--fondo);
-         padding:max(24px, env(safe-area-inset-top)) 20px max(32px, env(safe-area-inset-bottom)); }
-  main { max-width:440px; margin:0 auto; display:flex; flex-direction:column; gap:20px; }
-  header { display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; padding-top:8px; }
-  header img { width:220px; max-width:100%; height:auto; }
+         padding:max(20px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom)); }
+  main { max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
+  [hidden] { display:none !important; }
+  #vista-historial, #vista-registro { display:flex; flex-direction:column; gap:14px; }
+  #lista-historial { display:flex; flex-direction:column; gap:10px; }
+
+  /* Registro */
+  .portada { display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; padding-top:8px; }
+  .portada img { width:220px; max-width:100%; height:auto; }
   h1 { font-size:22px; margin:0; color:var(--petroleo); letter-spacing:.2px; }
   .sub { margin:0; color:var(--suave); font-size:15px; }
   .tarjeta { background:#fff; border:1px solid var(--linea); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:14px; }
@@ -30,68 +35,125 @@
   textarea { font:13px/1.4 ui-monospace, Menlo, monospace; min-height:120px; resize:vertical; word-break:break-all; }
   button { font:inherit; font-weight:600; border:0; border-radius:12px; padding:14px 16px; cursor:pointer; background:var(--naranja); color:#fff; }
   button.secundario { background:#fff; color:var(--petroleo); border:1px solid var(--petroleo); }
+  button.texto { background:none; color:var(--petroleo); padding:8px 4px; font-weight:600; }
   button:disabled { opacity:.55; cursor:default; }
   button:focus-visible, input:focus-visible, textarea:focus-visible { outline:3px solid rgba(255,107,0,.35); outline-offset:2px; }
   .fila { display:flex; gap:10px; flex-wrap:wrap; } .fila button { flex:1 1 140px; }
   .estado { font-size:14px; padding:10px 12px; border-radius:10px; background:#eef3f3; color:var(--petroleo); }
   .estado.ok { background:#e7f4ec; color:var(--ok); } .estado.mal { background:#fdeceb; color:#a0322b; }
   .nota { font-size:13px; color:var(--suave); margin:0; }
-  [hidden] { display:none !important; }
+
+  /* Historial */
+  .barra { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .marca { display:flex; align-items:center; gap:10px; }
+  .marca img { width:34px; height:34px; border-radius:9px; }
+  .marca strong { font-size:19px; color:var(--petroleo); }
+  .pestanas { display:flex; gap:6px; background:#e9eeee; padding:4px; border-radius:12px; }
+  .pestanas button { flex:1; background:none; color:var(--suave); padding:9px 10px; border-radius:9px; font-size:15px; }
+  .pestanas button[aria-selected="true"] { background:#fff; color:var(--tinta); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+  .resumen { display:flex; gap:10px; }
+  .cifra { flex:1; background:#fff; border:1px solid var(--linea); border-radius:14px; padding:12px 14px; }
+  .cifra b { display:block; font-size:24px; line-height:1.1; color:var(--tinta); font-variant-numeric:tabular-nums; }
+  .cifra span { font-size:13px; color:var(--suave); }
+  .dia { font-size:13px; font-weight:700; color:var(--suave); text-transform:uppercase; letter-spacing:.6px; margin:6px 2px 0; }
+  .lista { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
+  .aviso { background:#fff; border:1px solid var(--linea); border-radius:14px; padding:14px; display:grid; grid-template-columns:auto 1fr; gap:4px 12px; }
+  .aviso .punto { grid-row:span 3; width:10px; height:10px; border-radius:50%; background:var(--petroleo); margin-top:7px; }
+  .aviso.permiso .punto { background:var(--naranja); }
+  .aviso .arriba { display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
+  .aviso .titulo { font-weight:600; font-size:15px; overflow-wrap:anywhere; }
+  .aviso .hora { font-size:13px; color:var(--suave); white-space:nowrap; font-variant-numeric:tabular-nums; }
+  .aviso .cuerpo { font-size:14px; color:var(--suave); overflow-wrap:anywhere; }
+  .aviso .etiquetas { display:flex; gap:6px; flex-wrap:wrap; }
+  .chip { font-size:12px; padding:2px 8px; border-radius:999px; background:#eef3f3; color:var(--petroleo); }
+  .chip.permiso { background:var(--naranja-suave); color:#b54a00; }
+  .vacio { text-align:center; color:var(--suave); padding:36px 16px; background:#fff; border:1px dashed var(--linea); border-radius:14px; }
+  .vacio b { display:block; color:var(--tinta); margin-bottom:4px; }
 </style>
 </head>
 <body>
 <main>
-  <header>
-    <img src="iconos/evolve-horizontal.png" alt="Evolve Digital">
-    <h1>Evolve Alerts</h1>
-    <p class="sub">Te avisa en este teléfono cuando Claude Code termina o te pide permiso.</p>
-  </header>
-
-  <section class="tarjeta" id="paso-instalar" hidden>
-    <h2>Primero, instálala en tu pantalla de inicio</h2>
-    <ol>
-      <li>Abre esta página en <strong>Safari</strong>.</li>
-      <li>Toca el botón <strong>Compartir</strong> (el cuadro con la flecha hacia arriba).</li>
-      <li>Elige <strong>Agregar a inicio</strong> y confirma.</li>
-      <li>Abre <strong>Evolve Alerts</strong> desde el ícono nuevo.</li>
-    </ol>
-    <p class="nota">El iPhone sólo deja recibir notificaciones a las apps abiertas desde la pantalla de inicio, con iOS 16.4 o más nuevo.</p>
-  </section>
-
-  <section class="tarjeta" id="paso-activar" hidden>
-    <h2>Activa los avisos</h2>
-    <label for="nombre">¿Cómo se llama este teléfono?
-      <input id="nombre" type="text" placeholder="Ej. iPhone de Roberto" autocomplete="off">
-    </label>
-    <button id="activar" type="button">Activar notificaciones</button>
-    <div class="estado" id="estado" role="status" hidden></div>
-  </section>
-
-  <section class="tarjeta" id="paso-codigo" hidden>
-    <h2>Tu código de suscripción</h2>
-    <p class="nota">Pégalo en el instalador de tu PC. Es personal: quien lo tenga puede mandarte avisos.</p>
-    <label for="codigo">Código
-      <textarea id="codigo" readonly></textarea>
-    </label>
-    <div class="fila">
-      <button id="copiar" type="button">Copiar código</button>
-      <button id="compartir" class="secundario" type="button">Enviar a mi PC</button>
+  <!-- ═══ Historial: la pantalla de todos los días ═══ -->
+  <section id="vista-historial" hidden>
+    <div class="barra">
+      <div class="marca"><img src="iconos/icono-192.png" alt=""><strong>Evolve Alerts</strong></div>
+      <button class="texto" id="ir-ajustes" type="button">Ajustes</button>
     </div>
+    <div class="pestanas" role="tablist" aria-label="Qué avisos ver">
+      <button role="tab" id="tab-hoy" aria-selected="true" type="button">Hoy</button>
+      <button role="tab" id="tab-todo" aria-selected="false" type="button">Últimos 30 días</button>
+    </div>
+    <div class="resumen" id="resumen"></div>
+    <div id="lista-historial" style="display:flex;flex-direction:column;gap:10px"></div>
   </section>
 
-  <section class="tarjeta" id="sin-soporte" hidden>
-    <h2>Este navegador no puede recibir avisos</h2>
-    <p class="nota" id="sin-soporte-texto"></p>
+  <!-- ═══ Registro y ajustes ═══ -->
+  <section id="vista-registro" hidden style="display:flex;flex-direction:column;gap:18px">
+    <div class="barra" id="volver-barra" hidden>
+      <button class="texto" id="volver" type="button">‹ Historial</button>
+    </div>
+    <header class="portada">
+      <img src="iconos/evolve-horizontal.png" alt="Evolve Digital">
+      <h1>Evolve Alerts</h1>
+      <p class="sub">Te avisa en este teléfono cuando Claude Code termina o te pide permiso.</p>
+    </header>
+
+    <section class="tarjeta" id="paso-instalar" hidden>
+      <h2>Primero, instálala en tu pantalla de inicio</h2>
+      <ol>
+        <li>Abre esta página en <strong>Safari</strong>.</li>
+        <li>Toca el botón <strong>Compartir</strong> (el cuadro con la flecha hacia arriba).</li>
+        <li>Elige <strong>Agregar a inicio</strong> y confirma.</li>
+        <li>Abre <strong>Evolve Alerts</strong> desde el ícono nuevo.</li>
+      </ol>
+      <p class="nota">El iPhone sólo deja recibir notificaciones a las apps abiertas desde la pantalla de inicio, con iOS 16.4 o más nuevo.</p>
+    </section>
+
+    <section class="tarjeta" id="paso-activar" hidden>
+      <h2 id="titulo-activar">Activa los avisos</h2>
+      <label for="nombre">¿Cómo se llama este teléfono?
+        <input id="nombre" type="text" placeholder="Ej. iPhone de Roberto" autocomplete="off">
+      </label>
+      <button id="activar" type="button">Activar notificaciones</button>
+      <div class="estado" id="estado" role="status" hidden></div>
+    </section>
+
+    <section class="tarjeta" id="paso-codigo" hidden>
+      <h2>Tu código de suscripción</h2>
+      <p class="nota">Pégalo en el instalador de tu PC. Es personal: quien lo tenga puede mandarte avisos.</p>
+      <label for="codigo">Código
+        <textarea id="codigo" readonly></textarea>
+      </label>
+      <div class="fila">
+        <button id="copiar" type="button">Copiar código</button>
+        <button id="compartir" class="secundario" type="button">Enviar a mi PC</button>
+      </div>
+    </section>
+
+    <section class="tarjeta" id="paso-historial" hidden>
+      <h2>Historial</h2>
+      <p class="nota">Los avisos se guardan sólo en este teléfono y se borran solos a los 30 días.</p>
+      <button id="borrar" class="secundario" type="button">Borrar historial</button>
+    </section>
+
+    <section class="tarjeta" id="sin-soporte" hidden>
+      <h2>Este navegador no puede recibir avisos</h2>
+      <p class="nota" id="sin-soporte-texto"></p>
+    </section>
   </section>
 </main>
 
+<script src="historial.js"></script>
 <script>
 const LLAVE_PUBLICA = 'BNUvOsxj2KfuEPleOp46DX_1iU0cxPmxDDw4ObwvnVVVquwtF9-g03ppLCURFgpVM4kilXIMt1yDDyAXzG-cY4o';
 const $ = (id) => document.getElementById(id);
 const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const instalada = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const hayPush = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+let registrada = false;
+let filtro = 'hoy';
 
+/* ─── utilidades ─── */
 function aBytes(b64) {
   const relleno = '='.repeat((4 - b64.length % 4) % 4);
   const bin = atob((b64 + relleno).replace(/-/g, '+').replace(/_/g, '/'));
@@ -109,12 +171,76 @@ function mostrarCodigo(sub) {
   $('paso-codigo').hidden = false;
   try { localStorage.setItem('evolve-alerts-nombre', nombre); } catch {}
 }
+const inicioDelDia = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x.getTime(); };
+const hora = (ts) => new Date(ts).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
+function nombreDia(ts) {
+  const hoy = inicioDelDia(Date.now()), dia = inicioDelDia(ts);
+  if (dia === hoy) return 'Hoy';
+  if (dia === hoy - 86400000) return 'Ayer';
+  return new Date(ts).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
+}
+function el(tag, clase, texto) { const n = document.createElement(tag); if (clase) n.className = clase; if (texto != null) n.textContent = texto; return n; }
 
+/* ─── vistas ─── */
+function verHistorial() { $('vista-registro').hidden = true; $('vista-historial').hidden = false; pintarHistorial(); }
+function verAjustes() {
+  $('vista-historial').hidden = true; $('vista-registro').hidden = false;
+  $('volver-barra').hidden = !registrada; $('paso-historial').hidden = !registrada;
+  if (registrada) { $('titulo-activar').textContent = 'Este teléfono'; }
+}
+
+async function pintarHistorial() {
+  let avisos = [];
+  try { avisos = await Historial.todos(); } catch {}
+  const hoy = inicioDelDia(Date.now());
+  const deHoy = avisos.filter((a) => a.ts >= hoy);
+  const visibles = filtro === 'hoy' ? deHoy : avisos;
+
+  const resumen = $('resumen'); resumen.replaceChildren();
+  const cifra = (n, t) => { const c = el('div', 'cifra'); c.append(el('b', null, String(n)), el('span', null, t)); return c; };
+  const permisos = deHoy.filter((a) => a.evento === 'Notification' || /permiso/i.test(a.titulo)).length;
+  resumen.append(cifra(deHoy.length, deHoy.length === 1 ? 'aviso hoy' : 'avisos hoy'), cifra(permisos, permisos === 1 ? 'pidió permiso' : 'pidieron permiso'));
+
+  const cont = $('lista-historial'); cont.replaceChildren();
+  if (!visibles.length) {
+    const v = el('div', 'vacio');
+    v.append(el('b', null, filtro === 'hoy' ? 'Hoy no ha llegado ningún aviso' : 'Todavía no hay avisos guardados'),
+             el('span', null, 'Cuando Claude termine una tarea larga o te pida permiso, aparecerá aquí.'));
+    cont.append(v); return;
+  }
+  let diaActual = null, lista = null;
+  for (const a of visibles) {
+    const d = inicioDelDia(a.ts);
+    if (d !== diaActual) {
+      diaActual = d;
+      if (filtro !== 'hoy') cont.append(el('div', 'dia', nombreDia(a.ts)));
+      lista = el('ul', 'lista'); cont.append(lista);
+    }
+    const esPermiso = a.evento === 'Notification' || /permiso/i.test(a.titulo);
+    const li = el('li', 'aviso' + (esPermiso ? ' permiso' : ''));
+    li.append(el('span', 'punto'));
+    const arriba = el('div', 'arriba'); arriba.append(el('span', 'titulo', a.titulo), el('span', 'hora', hora(a.ts)));
+    li.append(arriba);
+    if (a.cuerpo) li.append(el('div', 'cuerpo', a.cuerpo));
+    const etiquetas = el('div', 'etiquetas');
+    if (a.carpeta) etiquetas.append(el('span', 'chip', a.carpeta));
+    if (esPermiso) etiquetas.append(el('span', 'chip permiso', 'pide permiso'));
+    if (etiquetas.childNodes.length) li.append(etiquetas);
+    lista.append(li);
+  }
+}
+
+async function marcarLeido() {
+  try { await Historial.marcarLeidos(); } catch {}
+  try { if (navigator.clearAppBadge) await navigator.clearAppBadge(); } catch {}
+}
+
+/* ─── arranque ─── */
 async function iniciar() {
   try { $('nombre').value = localStorage.getItem('evolve-alerts-nombre') || ''; } catch {}
-  if (esIOS && !instalada) { $('paso-instalar').hidden = false; return; }
+  if (esIOS && !instalada) { verAjustes(); $('paso-instalar').hidden = false; return; }
   if (!hayPush) {
-    $('sin-soporte').hidden = false;
+    verAjustes(); $('sin-soporte').hidden = false;
     $('sin-soporte-texto').textContent = esIOS
       ? 'Actualiza tu iPhone a iOS 16.4 o más nuevo y abre la app desde la pantalla de inicio.'
       : 'Prueba con Chrome en Android, o con Safari en iPhone desde la pantalla de inicio.';
@@ -122,14 +248,21 @@ async function iniciar() {
   }
   $('paso-activar').hidden = false;
   const registro = await navigator.serviceWorker.register('sw.js');
+  registro.update().catch(() => {});
   const actual = await registro.pushManager.getSubscription();
-  if (actual && Notification.permission === 'granted') {
-    estado('Los avisos ya están activos en este teléfono.', 'ok');
+  registrada = !!(actual && Notification.permission === 'granted');
+  if (registrada) {
+    estado('Los avisos están activos en este teléfono.', 'ok');
     $('activar').textContent = 'Volver a generar el código';
     mostrarCodigo(actual);
+    verHistorial();
+    marcarLeido();
+  } else {
+    verAjustes();
   }
 }
 
+/* ─── eventos ─── */
 $('activar').addEventListener('click', async () => {
   $('activar').disabled = true;
   try {
@@ -141,13 +274,14 @@ $('activar').addEventListener('click', async () => {
     const registro = await navigator.serviceWorker.ready;
     let sub = await registro.pushManager.getSubscription();
     if (!sub) sub = await registro.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: aBytes(LLAVE_PUBLICA) });
+    registrada = true;
     estado('Listo. Ahora copia tu código y pégalo en tu PC.', 'ok');
     mostrarCodigo(sub);
+    $('volver-barra').hidden = false; $('paso-historial').hidden = false;
   } catch (e) {
     estado('No se pudo activar: ' + (e && e.message ? e.message : e), 'mal');
   } finally { $('activar').disabled = false; }
 });
-
 $('copiar').addEventListener('click', async () => {
   const t = $('codigo').value;
   try { await navigator.clipboard.writeText(t); } catch { $('codigo').select(); document.execCommand('copy'); }
@@ -159,8 +293,30 @@ $('compartir').addEventListener('click', async () => {
   if (navigator.share) { try { await navigator.share({ title: 'Código de Evolve Alerts', text: t }); } catch {} }
   else { $('copiar').click(); }
 });
+$('ir-ajustes').addEventListener('click', verAjustes);
+$('volver').addEventListener('click', verHistorial);
+$('borrar').addEventListener('click', async () => {
+  if (!confirm('¿Borrar todos los avisos guardados en este teléfono?')) return;
+  await Historial.borrarTodo(); await marcarLeido(); verHistorial();
+});
+function elegir(f) {
+  filtro = f;
+  $('tab-hoy').setAttribute('aria-selected', String(f === 'hoy'));
+  $('tab-todo').setAttribute('aria-selected', String(f !== 'hoy'));
+  pintarHistorial();
+}
+$('tab-hoy').addEventListener('click', () => elegir('hoy'));
+$('tab-todo').addEventListener('click', () => elegir('todo'));
 
-iniciar().catch((e) => estado('Error al iniciar: ' + e.message, 'mal'));
+// Aviso nuevo con la app abierta, o la app vuelve al frente: se refresca sola.
+if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', (e) => {
+  if (e.data && e.data.tipo === 'nuevo-aviso' && registrada) { pintarHistorial(); if (!document.hidden) marcarLeido(); }
+});
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden && registrada) { pintarHistorial(); marcarLeido(); }
+});
+
+iniciar().catch((e) => { verAjustes(); estado('Error al iniciar: ' + e.message, 'mal'); });
 </script>
 </body>
 </html>
