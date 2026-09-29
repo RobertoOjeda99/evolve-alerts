@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Evolve Alerts</title>
-<meta name="description" content="Avisos de Claude Code para el equipo de Evolve Digital.">
+<meta name="description" content="Avisos de Claude Code y GitHub para el equipo de Evolve Digital.">
 <meta name="theme-color" content="#2c5c65">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="iconos/favicon-32.png">
@@ -13,135 +13,340 @@
 <meta name="apple-mobile-web-app-title" content="Evolve Alerts">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
-  :root { --naranja:#ff6b00; --naranja-suave:#fff1e6; --petroleo:#2c5c65; --tinta:#1d2b2f; --suave:#5d6f73; --fondo:#f6f7f7; --linea:#dfe5e6; --ok:#1f7a4d; }
-  * { box-sizing:border-box; }
-  body { margin:0; font:16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color:var(--tinta); background:var(--fondo);
-         padding:max(20px, env(safe-area-inset-top)) 16px max(32px, env(safe-area-inset-bottom)); }
-  main { max-width:520px; margin:0 auto; display:flex; flex-direction:column; gap:18px; }
+  :root {
+    --naranja:#ff6b00; --naranja-suave:#fff1e6; --naranja-texto:#b54a00;
+    --petroleo:#2c5c65; --petroleo-suave:#eaf1f2;
+    --morado:#5b4bb7; --morado-suave:#efedfb;
+    --verde:#1f7a4d; --verde-suave:#e7f4ec;
+    --tinta:#1d2b2f; --suave:#5d6f73; --fondo:#f6f7f7; --linea:#dfe5e6; --blanco:#fff;
+  }
+  * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html, body { background:var(--fondo); }
+  body { margin:0; font:16px/1.5 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; color:var(--tinta);
+         padding:max(16px, env(safe-area-inset-top)) 16px calc(88px + env(safe-area-inset-bottom)); }
+  body.sin-barra { padding-bottom:max(32px, env(safe-area-inset-bottom)); }
+  main { max-width:560px; margin:0 auto; }
   [hidden] { display:none !important; }
-  #vista-historial, #vista-registro { display:flex; flex-direction:column; gap:14px; }
-  #lista-historial { display:flex; flex-direction:column; gap:10px; }
+  .vista { display:flex; flex-direction:column; gap:14px; }
 
-  /* Registro */
-  .portada { display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; padding-top:8px; }
-  .portada img { width:220px; max-width:100%; height:auto; }
-  h1 { font-size:22px; margin:0; color:var(--petroleo); letter-spacing:.2px; }
-  .sub { margin:0; color:var(--suave); font-size:15px; }
-  .tarjeta { background:#fff; border:1px solid var(--linea); border-radius:16px; padding:20px; display:flex; flex-direction:column; gap:14px; }
-  .tarjeta h2 { margin:0; font-size:17px; }
-  ol { margin:0; padding-left:22px; display:flex; flex-direction:column; gap:8px; }
-  label { font-size:14px; color:var(--suave); display:flex; flex-direction:column; gap:6px; }
-  input, textarea { font:inherit; border:1px solid var(--linea); border-radius:10px; padding:12px; width:100%; background:#fff; color:var(--tinta); }
-  textarea { font:13px/1.4 ui-monospace, Menlo, monospace; min-height:120px; resize:vertical; word-break:break-all; }
-  button { font:inherit; font-weight:600; border:0; border-radius:12px; padding:14px 16px; cursor:pointer; background:var(--naranja); color:#fff; }
-  button.secundario { background:#fff; color:var(--petroleo); border:1px solid var(--petroleo); }
-  button.texto { background:none; color:var(--petroleo); padding:8px 4px; font-weight:600; }
+  /* tipografía y piezas */
+  h1 { font-size:24px; margin:0; color:var(--petroleo); }
+  h2 { font-size:17px; margin:0; }
+  .explica { margin:0; color:var(--suave); font-size:14px; }
+  .tarjeta { background:var(--blanco); border:1px solid var(--linea); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:12px; }
+  label.campo { font-size:14px; color:var(--suave); display:flex; flex-direction:column; gap:6px; }
+  input[type=text], input[type=search], input[type=time], select, textarea {
+    font:inherit; border:1px solid var(--linea); border-radius:10px; padding:11px 12px; width:100%; background:var(--blanco); color:var(--tinta); }
+  textarea { font:13px/1.4 ui-monospace, Menlo, monospace; min-height:110px; resize:vertical; word-break:break-all; }
+  button { font:inherit; font-weight:600; border:0; border-radius:12px; padding:13px 16px; cursor:pointer; background:var(--naranja); color:#fff; }
+  button.secundario { background:var(--blanco); color:var(--petroleo); border:1px solid var(--petroleo); }
+  button.texto { background:none; color:var(--petroleo); padding:8px 4px; }
   button:disabled { opacity:.55; cursor:default; }
-  button:focus-visible, input:focus-visible, textarea:focus-visible { outline:3px solid rgba(255,107,0,.35); outline-offset:2px; }
-  .fila { display:flex; gap:10px; flex-wrap:wrap; } .fila button { flex:1 1 140px; }
-  .estado { font-size:14px; padding:10px 12px; border-radius:10px; background:#eef3f3; color:var(--petroleo); }
-  .estado.ok { background:#e7f4ec; color:var(--ok); } .estado.mal { background:#fdeceb; color:#a0322b; }
-  .nota { font-size:13px; color:var(--suave); margin:0; }
+  :focus-visible { outline:3px solid rgba(255,107,0,.4); outline-offset:2px; }
+  .fila { display:flex; gap:10px; flex-wrap:wrap; } .fila > * { flex:1 1 140px; }
+  .estado { font-size:14px; padding:10px 12px; border-radius:10px; background:var(--petroleo-suave); color:var(--petroleo); }
+  .estado.ok { background:var(--verde-suave); color:var(--verde); } .estado.mal { background:#fdeceb; color:#a0322b; }
 
-  /* Historial */
-  .barra { display:flex; align-items:center; justify-content:space-between; gap:12px; }
-  .marca { display:flex; align-items:center; gap:10px; }
-  .marca img { width:34px; height:34px; border-radius:9px; }
-  .marca strong { font-size:19px; color:var(--petroleo); }
-  .pestanas { display:flex; gap:6px; background:#e9eeee; padding:4px; border-radius:12px; }
-  .pestanas button { flex:1; background:none; color:var(--suave); padding:9px 10px; border-radius:9px; font-size:15px; }
-  .pestanas button[aria-selected="true"] { background:#fff; color:var(--tinta); box-shadow:0 1px 2px rgba(0,0,0,.08); }
-  .resumen { display:flex; gap:10px; }
-  .cifra { flex:1; background:#fff; border:1px solid var(--linea); border-radius:14px; padding:12px 14px; }
-  .cifra b { display:block; font-size:24px; line-height:1.1; color:var(--tinta); font-variant-numeric:tabular-nums; }
-  .cifra span { font-size:13px; color:var(--suave); }
-  .dia { font-size:13px; font-weight:700; color:var(--suave); text-transform:uppercase; letter-spacing:.6px; margin:6px 2px 0; }
+  /* encabezado de cada pestaña */
+  .cabeza { display:flex; align-items:center; gap:10px; }
+  .cabeza img { width:32px; height:32px; border-radius:8px; }
+  .cabeza h1 { font-size:21px; }
+
+  /* barra de pestañas de abajo */
+  nav.barra { position:fixed; left:0; right:0; bottom:0; background:rgba(255,255,255,.96); border-top:1px solid var(--linea);
+              padding:6px 8px calc(6px + env(safe-area-inset-bottom)); display:flex; justify-content:center; backdrop-filter:blur(8px); }
+  nav.barra .dentro { display:flex; gap:4px; width:100%; max-width:560px; }
+  nav.barra button { flex:1; background:none; color:var(--suave); padding:8px 4px 6px; border-radius:10px; font-size:12px; font-weight:600;
+                     display:flex; flex-direction:column; align-items:center; gap:3px; }
+  nav.barra button svg { width:24px; height:24px; }
+  nav.barra button[aria-current="page"] { color:var(--naranja); }
+
+  /* segmentos (Hoy / 30 días) */
+  .segmentos { display:flex; gap:4px; background:#e9eeee; padding:4px; border-radius:12px; }
+  .segmentos button { flex:1; background:none; color:var(--suave); padding:8px 6px; border-radius:9px; font-size:15px; }
+  .segmentos button[aria-pressed="true"] { background:var(--blanco); color:var(--tinta); box-shadow:0 1px 2px rgba(0,0,0,.08); }
+
+  /* lista de avisos */
+  .dia { font-size:13px; font-weight:700; color:var(--suave); text-transform:uppercase; letter-spacing:.6px; margin:4px 2px 0; }
   .lista { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
-  .aviso { background:#fff; border:1px solid var(--linea); border-radius:14px; padding:14px; display:grid; grid-template-columns:auto 1fr; gap:4px 12px; }
-  .aviso .punto { grid-row:span 3; width:10px; height:10px; border-radius:50%; background:var(--petroleo); margin-top:7px; }
-  .aviso.permiso .punto { background:var(--naranja); }
+  .aviso { width:100%; text-align:left; background:var(--blanco); color:var(--tinta); border:1px solid var(--linea); border-radius:14px; padding:13px 14px;
+           display:grid; grid-template-columns:auto 1fr; gap:4px 12px; font-weight:400; }
+  .icono-cat { grid-row:span 3; width:34px; height:34px; border-radius:10px; display:grid; place-items:center; font-size:12px; font-weight:800; }
+  .icono-cat svg { width:18px; height:18px; }
+  .cat-claude { background:var(--petroleo-suave); color:var(--petroleo); }
+  .cat-permiso { background:var(--naranja-suave); color:var(--naranja-texto); }
+  .cat-github { background:var(--morado-suave); color:var(--morado); }
+  .cat-suite, .cat-prueba { background:var(--verde-suave); color:var(--verde); }
   .aviso .arriba { display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
   .aviso .titulo { font-weight:600; font-size:15px; overflow-wrap:anywhere; }
   .aviso .hora { font-size:13px; color:var(--suave); white-space:nowrap; font-variant-numeric:tabular-nums; }
-  .aviso .cuerpo { font-size:14px; color:var(--suave); overflow-wrap:anywhere; }
-  .aviso .etiquetas { display:flex; gap:6px; flex-wrap:wrap; }
-  .chip { font-size:12px; padding:2px 8px; border-radius:999px; background:#eef3f3; color:var(--petroleo); }
-  .chip.permiso { background:var(--naranja-suave); color:#b54a00; }
-  .vacio { text-align:center; color:var(--suave); padding:36px 16px; background:#fff; border:1px dashed var(--linea); border-radius:14px; }
+  .aviso .cuerpo { font-size:14px; color:var(--suave); overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; }
+  .chip { font-size:12px; padding:2px 9px; border-radius:999px; background:var(--petroleo-suave); color:var(--petroleo); font-weight:600; }
+  .vacio { text-align:center; color:var(--suave); padding:32px 16px; background:var(--blanco); border:1px dashed var(--linea); border-radius:14px; }
   .vacio b { display:block; color:var(--tinta); margin-bottom:4px; }
+
+  /* resumen */
+  .cifras { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .cifra { background:var(--blanco); border:1px solid var(--linea); border-radius:14px; padding:12px 14px; }
+  .cifra b { display:block; font-size:26px; line-height:1.1; font-variant-numeric:tabular-nums; }
+  .cifra span { font-size:13px; color:var(--suave); }
+  .barras { display:flex; flex-direction:column; gap:10px; }
+  .barra-fila { display:grid; grid-template-columns:110px 1fr 34px; gap:10px; align-items:center; font-size:14px; }
+  .barra-fila .nombre { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .barra-fila .pista { height:10px; background:#eef2f2; border-radius:999px; overflow:hidden; }
+  .barra-fila .relleno { height:100%; background:var(--petroleo); border-radius:999px; }
+  .barra-fila .n { text-align:right; font-variant-numeric:tabular-nums; color:var(--suave); }
+
+  /* ajustes */
+  .opcion { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:4px 0; }
+  .opcion + .opcion { border-top:1px solid #eef2f2; padding-top:12px; }
+  .opcion .txt { display:flex; flex-direction:column; }
+  .opcion .txt b { font-weight:600; font-size:15px; }
+  .opcion .txt span { font-size:13px; color:var(--suave); }
+  .interruptor { position:relative; width:52px; height:32px; flex:none; }
+  .interruptor input { position:absolute; inset:0; opacity:0; margin:0; cursor:pointer; z-index:1; }
+  .interruptor .pista { position:absolute; inset:0; border-radius:999px; background:#cfd8da; transition:background .15s; }
+  .interruptor .pista::after { content:''; position:absolute; top:3px; left:3px; width:26px; height:26px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:transform .15s; }
+  .interruptor input:checked + .pista { background:var(--verde); }
+  .interruptor input:checked + .pista::after { transform:translateX(20px); }
+  .interruptor input:focus-visible + .pista { outline:3px solid rgba(255,107,0,.4); outline-offset:2px; }
+  .sub-opcion { padding-left:4px; }
+  .sub-opcion[aria-disabled="true"] { opacity:.45; pointer-events:none; }
+  .carpetas { display:flex; gap:8px; flex-wrap:wrap; }
+  .carpetas button { background:var(--blanco); color:var(--tinta); border:1px solid var(--linea); padding:8px 12px; border-radius:999px; font-size:14px; font-weight:600; }
+  .carpetas button[aria-pressed="true"] { background:#fdeceb; border-color:#f3b8b3; color:#a0322b; text-decoration:line-through; }
+  .aviso-cambios { background:var(--naranja-suave); color:var(--naranja-texto); border:1px solid #ffd3b0; border-radius:14px; padding:12px 14px; font-size:14px; }
+  .pasos { margin:0; padding-left:22px; display:flex; flex-direction:column; gap:6px; font-size:14px; }
+  code.cmd { display:block; background:#1d2b2f; color:#fff; border-radius:10px; padding:10px 12px; font:14px ui-monospace, Menlo, monospace; }
+  .portada { display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; padding-top:8px; }
+  .portada img { width:220px; max-width:100%; height:auto; }
+
+  /* detalle de un aviso */
+  .velo { position:fixed; inset:0; background:rgba(20,30,33,.45); display:flex; align-items:flex-end; justify-content:center; z-index:20; }
+  .hoja { background:var(--blanco); width:100%; max-width:560px; max-height:88vh; overflow:auto; border-radius:20px 20px 0 0;
+          padding:18px 18px calc(20px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:12px; }
+  .hoja .asa { width:40px; height:5px; border-radius:99px; background:#d5dcdd; align-self:center; }
+  .hoja .completo { white-space:pre-wrap; overflow-wrap:anywhere; font-size:15px; line-height:1.55; background:var(--fondo); border-radius:12px; padding:12px; }
+  .hoja .meta { font-size:13px; color:var(--suave); }
+  @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
 </style>
 </head>
-<body>
+<body class="sin-barra">
 <main>
-  <!-- ═══ Historial: la pantalla de todos los días ═══ -->
-  <section id="vista-historial" hidden>
-    <div class="barra">
-      <div class="marca"><img src="iconos/icono-192.png" alt=""><strong>Evolve Alerts</strong></div>
-      <button class="texto" id="ir-ajustes" type="button">Ajustes</button>
-    </div>
-    <div class="pestanas" role="tablist" aria-label="Qué avisos ver">
-      <button role="tab" id="tab-hoy" aria-selected="true" type="button">Hoy</button>
-      <button role="tab" id="tab-todo" aria-selected="false" type="button">Últimos 30 días</button>
-    </div>
-    <div class="resumen" id="resumen"></div>
-    <div id="lista-historial" style="display:flex;flex-direction:column;gap:10px"></div>
+
+<!-- ═════════════ REGISTRO (primera vez) ═════════════ -->
+<section class="vista" id="vista-registro" hidden>
+  <header class="portada">
+    <img src="iconos/evolve-horizontal.png" alt="Evolve Digital">
+    <h1>Evolve Alerts</h1>
+    <p class="explica">Te avisa en este teléfono cuando Claude termina, cuando te pide permiso y lo que pasa en GitHub.</p>
+  </header>
+
+  <section class="tarjeta" id="paso-instalar" hidden>
+    <h2>Paso 1: ponla en tu pantalla de inicio</h2>
+    <ol class="pasos">
+      <li>Abre esta página en <strong>Safari</strong>.</li>
+      <li>Toca <strong>Compartir</strong> (el cuadrito con la flecha hacia arriba).</li>
+      <li>Elige <strong>Agregar a inicio</strong>.</li>
+      <li>Abre <strong>Evolve Alerts</strong> desde el ícono nuevo.</li>
+    </ol>
+    <p class="explica">El iPhone sólo deja mandar avisos a las apps que abres desde la pantalla de inicio.</p>
   </section>
 
-  <!-- ═══ Registro y ajustes ═══ -->
-  <section id="vista-registro" hidden style="display:flex;flex-direction:column;gap:18px">
-    <div class="barra" id="volver-barra" hidden>
-      <button class="texto" id="volver" type="button">‹ Historial</button>
+  <section class="tarjeta" id="paso-activar" hidden>
+    <h2>Paso 2: activa los avisos</h2>
+    <label class="campo" for="nombre">Ponle un nombre a este teléfono
+      <input id="nombre" type="text" placeholder="Ej. iPhone de Roberto" autocomplete="off">
+    </label>
+    <button id="activar" type="button">Activar avisos</button>
+    <div class="estado" id="estado" role="status" hidden></div>
+  </section>
+
+  <section class="tarjeta" id="paso-codigo" hidden>
+    <h2>Paso 3: pasa tu código a la PC</h2>
+    <ol class="pasos">
+      <li>Toca <strong>Enviar a mi PC</strong> y mándatelo por WhatsApp.</li>
+      <li>En la PC, copia el código y escribe en la terminal:</li>
+    </ol>
+    <code class="cmd">evolve-alerts pegar</code>
+    <label class="campo" for="codigo">Tu código (es personal, no lo compartas)
+      <textarea id="codigo" readonly></textarea>
+    </label>
+    <div class="fila">
+      <button id="compartir" type="button">Enviar a mi PC</button>
+      <button id="copiar" class="secundario" type="button">Copiar</button>
     </div>
-    <header class="portada">
-      <img src="iconos/evolve-horizontal.png" alt="Evolve Digital">
-      <h1>Evolve Alerts</h1>
-      <p class="sub">Te avisa en este teléfono cuando Claude Code termina o te pide permiso.</p>
-    </header>
+    <button id="ir-avisos" class="secundario" type="button" hidden>Listo, ir a mis avisos</button>
+  </section>
 
-    <section class="tarjeta" id="paso-instalar" hidden>
-      <h2>Primero, instálala en tu pantalla de inicio</h2>
-      <ol>
-        <li>Abre esta página en <strong>Safari</strong>.</li>
-        <li>Toca el botón <strong>Compartir</strong> (el cuadro con la flecha hacia arriba).</li>
-        <li>Elige <strong>Agregar a inicio</strong> y confirma.</li>
-        <li>Abre <strong>Evolve Alerts</strong> desde el ícono nuevo.</li>
-      </ol>
-      <p class="nota">El iPhone sólo deja recibir notificaciones a las apps abiertas desde la pantalla de inicio, con iOS 16.4 o más nuevo.</p>
-    </section>
+  <section class="tarjeta" id="sin-soporte" hidden>
+    <h2>Este navegador no puede recibir avisos</h2>
+    <p class="explica" id="sin-soporte-texto"></p>
+  </section>
+</section>
 
-    <section class="tarjeta" id="paso-activar" hidden>
-      <h2 id="titulo-activar">Activa los avisos</h2>
-      <label for="nombre">¿Cómo se llama este teléfono?
-        <input id="nombre" type="text" placeholder="Ej. iPhone de Roberto" autocomplete="off">
+<!-- ═════════════ PESTAÑA: AVISOS ═════════════ -->
+<section class="vista" id="vista-avisos" hidden>
+  <div class="cabeza"><img src="iconos/icono-192.png" alt=""><h1>Mis avisos</h1></div>
+  <p class="explica">Todo lo que te ha llegado a este teléfono. Toca uno para leerlo completo.</p>
+  <input id="buscar" type="search" placeholder="Buscar, por ejemplo: PR #345 o operacion" aria-label="Buscar en mis avisos" autocomplete="off">
+  <div class="segmentos" role="group" aria-label="Qué días ver">
+    <button type="button" id="ver-hoy" aria-pressed="true">Hoy</button>
+    <button type="button" id="ver-todo" aria-pressed="false">Últimos 30 días</button>
+  </div>
+  <div id="lista-avisos" class="vista" style="gap:10px"></div>
+</section>
+
+<!-- ═════════════ PESTAÑA: RESUMEN ═════════════ -->
+<section class="vista" id="vista-resumen" hidden>
+  <div class="cabeza"><img src="iconos/icono-192.png" alt=""><h1>Resumen</h1></div>
+  <p class="explica">Cuánto trabajaron tus ventanas de Claude y qué pasó en GitHub.</p>
+  <div class="segmentos" role="group" aria-label="Qué periodo resumir">
+    <button type="button" data-periodo="hoy" aria-pressed="true">Hoy</button>
+    <button type="button" data-periodo="ayer" aria-pressed="false">Ayer</button>
+    <button type="button" data-periodo="7" aria-pressed="false">7 días</button>
+  </div>
+  <div id="contenido-resumen" class="vista"></div>
+</section>
+
+<!-- ═════════════ PESTAÑA: AJUSTES ═════════════ -->
+<section class="vista" id="vista-ajustes" hidden>
+  <div class="cabeza"><img src="iconos/icono-192.png" alt=""><h1>Ajustes</h1></div>
+  <p class="explica">Elige qué avisos quieres recibir. Cuando termines, toca <b>Guardar y mandar a mi PC</b>.</p>
+
+  <div class="aviso-cambios" id="cambios-pendientes" hidden>Tienes cambios sin mandar a tu PC. Hasta que lo hagas, tu PC sigue usando los ajustes de antes.</div>
+
+  <section class="tarjeta">
+    <h2>Claude</h2>
+    <p class="explica">Las ventanas de Claude Code en tu PC.</p>
+    <div class="opcion">
+      <div class="txt"><b>Cuando termina una tarea</b><span>Te avisa cuando una ventana acaba de responder.</span></div>
+      <label class="interruptor"><input type="checkbox" id="aj-claude" aria-label="Avisar cuando Claude termina una tarea"><span class="pista"></span></label>
+    </div>
+    <div class="opcion sub-opcion" id="fila-min">
+      <label class="campo" for="aj-min" style="flex:1">Sólo si tardó más de
+        <select id="aj-min">
+          <option value="0">Avisarme siempre</option>
+          <option value="30">30 segundos</option>
+          <option value="60">1 minuto</option>
+          <option value="90">1 minuto y medio</option>
+          <option value="120">2 minutos</option>
+          <option value="300">5 minutos</option>
+          <option value="600">10 minutos</option>
+        </select>
       </label>
-      <button id="activar" type="button">Activar notificaciones</button>
-      <div class="estado" id="estado" role="status" hidden></div>
-    </section>
+    </div>
+    <div class="opcion">
+      <div class="txt"><b>Cuando te pide permiso</b><span>Una ventana se detuvo y necesita que le digas que sí o que no.</span></div>
+      <label class="interruptor"><input type="checkbox" id="aj-permisos" aria-label="Avisar cuando Claude pide permiso"><span class="pista"></span></label>
+    </div>
+  </section>
 
-    <section class="tarjeta" id="paso-codigo" hidden>
-      <h2>Tu código de suscripción</h2>
-      <p class="nota">Pégalo en el instalador de tu PC. Es personal: quien lo tenga puede mandarte avisos.</p>
-      <label for="codigo">Código
-        <textarea id="codigo" readonly></textarea>
-      </label>
+  <section class="tarjeta">
+    <h2>Carpetas en silencio</h2>
+    <p class="explica">Toca una carpeta de Claude para que deje de avisarte. Tócala otra vez para que vuelva a avisarte. Aparecen aquí las que ya te han mandado avisos.</p>
+    <div class="carpetas" id="aj-carpetas"></div>
+  </section>
+
+  <section class="tarjeta">
+    <h2>GitHub</h2>
+    <p class="explica">Tu PC revisa GitHub cada 3 minutos con tu cuenta. Si tu PC está apagada, te avisa cuando la prendas.</p>
+    <div class="opcion"><div class="txt"><b>Mergearon tu PR</b><span>Tu cambio ya entró al proyecto.</span></div>
+      <label class="interruptor"><input type="checkbox" id="aj-gh-merge" aria-label="Avisar cuando mergean tu PR"><span class="pista"></span></label></div>
+    <div class="opcion"><div class="txt"><b>Te pidieron cambios</b><span>Alguien revisó tu PR y quiere que corrijas algo.</span></div>
+      <label class="interruptor"><input type="checkbox" id="aj-gh-cambios" aria-label="Avisar cuando te piden cambios"><span class="pista"></span></label></div>
+    <div class="opcion"><div class="txt"><b>Comentaron tu PR</b><span>Alguien escribió en tu PR.</span></div>
+      <label class="interruptor"><input type="checkbox" id="aj-gh-comentarios" aria-label="Avisar cuando comentan tu PR"><span class="pista"></span></label></div>
+    <div class="opcion"><div class="txt"><b>Falló la revisión automática</b><span>Las pruebas automáticas de tu PR salieron en rojo.</span></div>
+      <label class="interruptor"><input type="checkbox" id="aj-gh-ci" aria-label="Avisar cuando falla la revisión automática"><span class="pista"></span></label></div>
+    <div class="opcion"><div class="txt"><b>Terminó un deploy</b><span>Se subió una versión nueva a producción, o falló al subirse.</span></div>
+      <label class="interruptor"><input type="checkbox" id="aj-gh-deploy" aria-label="Avisar cuando termina un deploy"><span class="pista"></span></label></div>
+  </section>
+
+  <section class="tarjeta">
+    <h2>Suite de pruebas</h2>
+    <p class="explica">Sólo sirve si en tu PC corren los carriles del ERP.</p>
+    <div class="opcion"><div class="txt"><b>Cuando la suite queda libre</b><span>Te avisa quién la usó y cuánto tardó.</span></div>
+      <label class="interruptor"><input type="checkbox" id="aj-suite" aria-label="Avisar cuando la suite queda libre"><span class="pista"></span></label></div>
+  </section>
+
+  <section class="tarjeta">
+    <h2>No molestar</h2>
+    <p class="explica">En estas horas tu teléfono no suena. En la PC sí te siguen saliendo los avisos.</p>
+    <div class="opcion"><div class="txt"><b>Activar no molestar</b><span>Por ejemplo, de noche.</span></div>
+      <label class="interruptor"><input type="checkbox" id="aj-nm" aria-label="Activar no molestar"><span class="pista"></span></label></div>
+    <div class="sub-opcion" id="fila-nm">
       <div class="fila">
-        <button id="copiar" type="button">Copiar código</button>
-        <button id="compartir" class="secundario" type="button">Enviar a mi PC</button>
+        <label class="campo" for="aj-nm-desde">Desde las <input id="aj-nm-desde" type="time"></label>
+        <label class="campo" for="aj-nm-hasta">Hasta las <input id="aj-nm-hasta" type="time"></label>
       </div>
-    </section>
-
-    <section class="tarjeta" id="paso-historial" hidden>
-      <h2>Historial</h2>
-      <p class="nota">Los avisos se guardan sólo en este teléfono y se borran solos a los 30 días.</p>
-      <button id="borrar" class="secundario" type="button">Borrar historial</button>
-    </section>
-
-    <section class="tarjeta" id="sin-soporte" hidden>
-      <h2>Este navegador no puede recibir avisos</h2>
-      <p class="nota" id="sin-soporte-texto"></p>
-    </section>
+      <div class="opcion" style="margin-top:10px"><div class="txt"><b>Pero sí avísame si pide permiso</b><span>Para que ninguna ventana se quede esperándote toda la noche.</span></div>
+        <label class="interruptor"><input type="checkbox" id="aj-nm-permisos" aria-label="En no molestar, sí avisar permisos"><span class="pista"></span></label></div>
+    </div>
   </section>
+
+  <button id="guardar" type="button">Guardar y mandar a mi PC</button>
+
+  <section class="tarjeta" id="codigo-ajustes-caja" hidden>
+    <h2>Manda tus ajustes a tu PC</h2>
+    <ol class="pasos">
+      <li>Toca <strong>Enviar a mi PC</strong> y mándatelo por WhatsApp.</li>
+      <li>En la PC, copia el código y escribe en la terminal:</li>
+    </ol>
+    <code class="cmd">evolve-alerts pegar</code>
+    <label class="campo" for="codigo-ajustes">Código de ajustes
+      <textarea id="codigo-ajustes" readonly></textarea>
+    </label>
+    <div class="fila">
+      <button id="compartir-ajustes" type="button">Enviar a mi PC</button>
+      <button id="copiar-ajustes" class="secundario" type="button">Copiar</button>
+    </div>
+  </section>
+
+  <section class="tarjeta">
+    <h2>Este teléfono</h2>
+    <p class="explica" id="nombre-telefono"></p>
+    <div class="fila">
+      <button id="ver-registro" class="secundario" type="button">Ver mi código de teléfono</button>
+      <button id="borrar" class="secundario" type="button">Borrar historial</button>
+    </div>
+    <p class="explica">El historial se guarda sólo en este teléfono y se borra solo a los 30 días.</p>
+  </section>
+</section>
+
+<!-- ═════════════ DETALLE DE UN AVISO ═════════════ -->
+<div class="velo" id="velo" hidden>
+  <div class="hoja" role="dialog" aria-modal="true" aria-labelledby="det-titulo">
+    <div class="asa"></div>
+    <h2 id="det-titulo"></h2>
+    <div class="chips" id="det-chips"></div>
+    <div class="meta" id="det-meta"></div>
+    <div class="completo" id="det-texto"></div>
+    <div class="fila">
+      <button id="det-copiar" class="secundario" type="button">Copiar texto</button>
+      <button id="det-enlace" class="secundario" type="button" hidden>Abrir en GitHub</button>
+    </div>
+    <button id="det-cerrar" type="button">Cerrar</button>
+  </div>
+</div>
+
 </main>
+
+<!-- ═════════════ BARRA DE ABAJO ═════════════ -->
+<nav class="barra" id="barra" hidden aria-label="Secciones">
+  <div class="dentro">
+    <button type="button" data-ir="avisos" aria-current="page">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+      Avisos</button>
+    <button type="button" data-ir="resumen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-8"/></svg>
+      Resumen</button>
+    <button type="button" data-ir="ajustes">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7"/><path d="M4 10V3"/><path d="M12 21v-9"/><path d="M12 8V3"/><path d="M20 21v-5"/><path d="M20 12V3"/><path d="M1 14h6"/><path d="M9 8h6"/><path d="M17 16h6"/></svg>
+      Ajustes</button>
+  </div>
+</nav>
 
 <script src="historial.js"></script>
 <script>
@@ -150,10 +355,24 @@ const $ = (id) => document.getElementById(id);
 const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const instalada = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const hayPush = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+
+/* Ajustes por defecto. La PC tiene la misma tabla; si cambias una, cambia la otra (evolve-alerts.mjs). */
+const AJUSTES_BASE = {
+  v: 1,
+  claude: { terminar: true, minSegundos: 90, permisos: true },
+  carpetasSilencio: [],
+  github: { merge: true, cambios: true, comentarios: true, ci: true, deploy: true },
+  suite: { libre: true },
+  noMolestar: { activo: false, desde: '21:00', hasta: '08:00', permisos: true },
+};
+
 let registrada = false;
-let filtro = 'hoy';
+let filtroDias = 'hoy';
+let periodo = 'hoy';
+let cacheAvisos = [];
 
 /* ─── utilidades ─── */
+const guardado = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch {} return null; };
 function aBytes(b64) {
   const relleno = '='.repeat((4 - b64.length % 4) % 4);
   const bin = atob((b64 + relleno).replace(/-/g, '+').replace(/_/g, '/'));
@@ -164,13 +383,7 @@ function aCodigo(obj) {
   let bin = ''; bytes.forEach((b) => { bin += String.fromCharCode(b); });
   return btoa(bin).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 }
-function estado(texto, tipo) { const e = $('estado'); e.hidden = false; e.textContent = texto; e.className = 'estado' + (tipo ? ' ' + tipo : ''); }
-function mostrarCodigo(sub) {
-  const nombre = ($('nombre').value || '').trim() || 'mi teléfono';
-  $('codigo').value = aCodigo({ nombre, suscripcion: sub.toJSON ? sub.toJSON() : sub });
-  $('paso-codigo').hidden = false;
-  try { localStorage.setItem('evolve-alerts-nombre', nombre); } catch {}
-}
+function el(tag, clase, texto) { const n = document.createElement(tag); if (clase) n.className = clase; if (texto != null) n.textContent = texto; return n; }
 const inicioDelDia = (d) => { const x = new Date(d); x.setHours(0, 0, 0, 0); return x.getTime(); };
 const hora = (ts) => new Date(ts).toLocaleTimeString('es-MX', { hour: 'numeric', minute: '2-digit' });
 function nombreDia(ts) {
@@ -179,68 +392,317 @@ function nombreDia(ts) {
   if (dia === hoy - 86400000) return 'Ayer';
   return new Date(ts).toLocaleDateString('es-MX', { weekday: 'long', day: 'numeric', month: 'long' });
 }
-function el(tag, clase, texto) { const n = document.createElement(tag); if (clase) n.className = clase; if (texto != null) n.textContent = texto; return n; }
-
-/* ─── vistas ─── */
-function verHistorial() { $('vista-registro').hidden = true; $('vista-historial').hidden = false; pintarHistorial(); }
-function verAjustes() {
-  $('vista-historial').hidden = true; $('vista-registro').hidden = false;
-  $('volver-barra').hidden = !registrada; $('paso-historial').hidden = !registrada;
-  if (registrada) { $('titulo-activar').textContent = 'Este teléfono'; }
+function duracion(seg, redondo) {
+  if (seg == null || seg < 0) return '';
+  const h = Math.floor(seg / 3600), m = Math.floor((seg % 3600) / 60), s = seg % 60;
+  if (h) return `${h} h ${m} min`;
+  if (m) return redondo ? `${m} min` : `${m} min${s ? ` ${s} s` : ''}`;
+  return `${s} s`;
+}
+const categoriaDe = (a) => a.categoria || ((a.evento === 'Notification' || /permiso/i.test(a.titulo || '')) ? 'permiso' : 'claude');
+const NOMBRE_CATEGORIA = { claude: 'Claude terminó', permiso: 'Pide permiso', github: 'GitHub', suite: 'Suite', prueba: 'Prueba' };
+function iconoCategoria(cat) {
+  const svg = {
+    claude: '<path d="M20 6 9 17l-5-5"/>',
+    permiso: '<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+    github: '<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/>',
+    suite: '<path d="M9 2v6l-5 9a2 2 0 0 0 1.7 3h12.6a2 2 0 0 0 1.7-3l-5-9V2"/><path d="M8 2h8"/>',
+    prueba: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>',
+  }[cat] || '';
+  const s = el('span', `icono-cat cat-${cat}`);
+  s.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${svg}</svg>`;
+  return s;
+}
+async function copiarTexto(t, boton) {
+  try { await navigator.clipboard.writeText(t); } catch {
+    const a = el('textarea'); a.value = t; document.body.append(a); a.select(); document.execCommand('copy'); a.remove();
+  }
+  if (boton) { const antes = boton.textContent; boton.textContent = 'Copiado'; setTimeout(() => { boton.textContent = antes; }, 1800); }
+}
+async function compartirTexto(titulo, t, botonCopiar) {
+  if (navigator.share) { try { await navigator.share({ title: titulo, text: t }); return; } catch { return; } }
+  copiarTexto(t, botonCopiar);
 }
 
-async function pintarHistorial() {
-  let avisos = [];
-  try { avisos = await Historial.todos(); } catch {}
+/* ─── navegación ─── */
+function ir(seccion) {
+  for (const s of ['registro', 'avisos', 'resumen', 'ajustes']) $(`vista-${s}`).hidden = s !== seccion;
+  const conBarra = seccion !== 'registro' && registrada;
+  $('barra').hidden = !conBarra;
+  document.body.classList.toggle('sin-barra', !conBarra);
+  document.querySelectorAll('nav.barra button').forEach((b) => {
+    if (b.dataset.ir === seccion) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+  });
+  if (seccion === 'avisos') pintarAvisos();
+  if (seccion === 'resumen') pintarResumen();
+  if (seccion === 'ajustes') pintarAjustes();
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('nav.barra button').forEach((b) => b.addEventListener('click', () => ir(b.dataset.ir)));
+
+/* ─── AVISOS ─── */
+async function cargar() { try { cacheAvisos = await Historial.todos(); } catch { cacheAvisos = []; } return cacheAvisos; }
+
+async function pintarAvisos() {
+  const todos = await cargar();
+  const q = ($('buscar').value || '').trim().toLowerCase();
   const hoy = inicioDelDia(Date.now());
-  const deHoy = avisos.filter((a) => a.ts >= hoy);
-  const visibles = filtro === 'hoy' ? deHoy : avisos;
+  let lista = filtroDias === 'hoy' ? todos.filter((a) => a.ts >= hoy) : todos;
+  if (q) lista = lista.filter((a) => [a.titulo, a.cuerpo, a.completo, a.carpeta].join(' ').toLowerCase().includes(q));
 
-  const resumen = $('resumen'); resumen.replaceChildren();
-  const cifra = (n, t) => { const c = el('div', 'cifra'); c.append(el('b', null, String(n)), el('span', null, t)); return c; };
-  const permisos = deHoy.filter((a) => a.evento === 'Notification' || /permiso/i.test(a.titulo)).length;
-  resumen.append(cifra(deHoy.length, deHoy.length === 1 ? 'aviso hoy' : 'avisos hoy'), cifra(permisos, permisos === 1 ? 'pidió permiso' : 'pidieron permiso'));
-
-  const cont = $('lista-historial'); cont.replaceChildren();
-  if (!visibles.length) {
+  const cont = $('lista-avisos'); cont.replaceChildren();
+  if (!lista.length) {
     const v = el('div', 'vacio');
-    v.append(el('b', null, filtro === 'hoy' ? 'Hoy no ha llegado ningún aviso' : 'Todavía no hay avisos guardados'),
-             el('span', null, 'Cuando Claude termine una tarea larga o te pida permiso, aparecerá aquí.'));
+    v.append(el('b', null, q ? 'No encontré nada con esa búsqueda' : (filtroDias === 'hoy' ? 'Hoy no te ha llegado ningún aviso' : 'Todavía no hay avisos guardados')),
+             el('span', null, q ? 'Prueba con otra palabra, o busca en los últimos 30 días.' : 'Cuando Claude termine una tarea o pase algo en GitHub, aparecerá aquí.'));
     cont.append(v); return;
   }
-  let diaActual = null, lista = null;
-  for (const a of visibles) {
+  let dia = null, ul = null;
+  for (const a of lista) {
     const d = inicioDelDia(a.ts);
-    if (d !== diaActual) {
-      diaActual = d;
-      if (filtro !== 'hoy') cont.append(el('div', 'dia', nombreDia(a.ts)));
-      lista = el('ul', 'lista'); cont.append(lista);
+    if (d !== dia) {
+      dia = d;
+      if (filtroDias !== 'hoy') cont.append(el('div', 'dia', nombreDia(a.ts)));
+      ul = el('ul', 'lista'); cont.append(ul);
     }
-    const esPermiso = a.evento === 'Notification' || /permiso/i.test(a.titulo);
-    const li = el('li', 'aviso' + (esPermiso ? ' permiso' : ''));
-    li.append(el('span', 'punto'));
+    const cat = categoriaDe(a);
+    const li = el('li');
+    const b = el('button', 'aviso'); b.type = 'button';
+    b.setAttribute('aria-label', `${a.titulo}, ${hora(a.ts)}. Abrir completo.`);
+    b.append(iconoCategoria(cat));
     const arriba = el('div', 'arriba'); arriba.append(el('span', 'titulo', a.titulo), el('span', 'hora', hora(a.ts)));
-    li.append(arriba);
-    if (a.cuerpo) li.append(el('div', 'cuerpo', a.cuerpo));
-    const etiquetas = el('div', 'etiquetas');
-    if (a.carpeta) etiquetas.append(el('span', 'chip', a.carpeta));
-    if (esPermiso) etiquetas.append(el('span', 'chip permiso', 'pide permiso'));
-    if (etiquetas.childNodes.length) li.append(etiquetas);
-    lista.append(li);
+    b.append(arriba);
+    if (a.cuerpo) b.append(el('div', 'cuerpo', a.cuerpo));
+    const chips = el('div', 'chips');
+    chips.append(el('span', 'chip', NOMBRE_CATEGORIA[cat] || cat));
+    if (a.carpeta) chips.append(el('span', 'chip', a.carpeta));
+    b.append(chips);
+    b.addEventListener('click', () => abrirDetalle(a.id));
+    li.append(b); ul.append(li);
   }
 }
+$('buscar').addEventListener('input', () => pintarAvisos());
+function elegirDias(f) {
+  filtroDias = f;
+  $('ver-hoy').setAttribute('aria-pressed', String(f === 'hoy'));
+  $('ver-todo').setAttribute('aria-pressed', String(f !== 'hoy'));
+  pintarAvisos();
+}
+$('ver-hoy').addEventListener('click', () => elegirDias('hoy'));
+$('ver-todo').addEventListener('click', () => elegirDias('todo'));
 
+/* detalle */
+let enlaceActual = '';
+async function abrirDetalle(id) {
+  let a = cacheAvisos.find((x) => String(x.id) === String(id));
+  if (!a) { try { a = await Historial.uno(id); } catch {} }
+  if (!a) return;
+  const cat = categoriaDe(a);
+  $('det-titulo').textContent = a.titulo;
+  const chips = $('det-chips'); chips.replaceChildren(el('span', 'chip', NOMBRE_CATEGORIA[cat] || cat));
+  if (a.carpeta) chips.append(el('span', 'chip', a.carpeta));
+  const partes = [`${nombreDia(a.ts)}, ${hora(a.ts)}`];
+  if (a.segundos != null && cat === 'claude') partes.push(`trabajó ${duracion(a.segundos)}`);
+  $('det-meta').textContent = partes.join(' · ');
+  $('det-texto').textContent = a.completo || a.cuerpo || '(sin texto)';
+  enlaceActual = a.enlace || '';
+  $('det-enlace').hidden = !enlaceActual;
+  $('velo').hidden = false;
+  $('det-cerrar').focus();
+}
+function cerrarDetalle() { $('velo').hidden = true; if (location.hash.startsWith('#aviso-')) history.replaceState(null, '', location.pathname); }
+$('det-cerrar').addEventListener('click', cerrarDetalle);
+$('velo').addEventListener('click', (e) => { if (e.target === $('velo')) cerrarDetalle(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('velo').hidden) cerrarDetalle(); });
+$('det-copiar').addEventListener('click', () => copiarTexto($('det-texto').textContent, $('det-copiar')));
+$('det-enlace').addEventListener('click', () => { if (enlaceActual) window.open(enlaceActual, '_blank'); });
+
+/* ─── RESUMEN ─── */
+async function pintarResumen() {
+  const todos = await cargar();
+  const hoy = inicioDelDia(Date.now());
+  const rango = periodo === 'hoy' ? [hoy, Infinity] : periodo === 'ayer' ? [hoy - 86400000, hoy] : [hoy - 6 * 86400000, Infinity];
+  const sel = todos.filter((a) => a.ts >= rango[0] && a.ts < rango[1]);
+  const cont = $('contenido-resumen'); cont.replaceChildren();
+  if (!sel.length) {
+    const v = el('div', 'vacio');
+    v.append(el('b', null, 'No hay nada que resumir en este periodo'), el('span', null, 'Aquí verás cuántas tareas terminaron tus ventanas y qué pasó en GitHub.'));
+    cont.append(v); return;
+  }
+  const deClaude = sel.filter((a) => categoriaDe(a) === 'claude');
+  const permisos = sel.filter((a) => categoriaDe(a) === 'permiso').length;
+  const github = sel.filter((a) => categoriaDe(a) === 'github').length;
+  const segundos = deClaude.reduce((t, a) => t + (a.segundos > 0 ? a.segundos : 0), 0);
+
+  const cifras = el('div', 'cifras');
+  const cifra = (n, t) => { const c = el('div', 'cifra'); c.append(el('b', null, String(n)), el('span', null, t)); return c; };
+  cifras.append(
+    cifra(deClaude.length, deClaude.length === 1 ? 'tarea terminada' : 'tareas terminadas'),
+    cifra(segundos ? duracion(segundos, true) : '0 min', 'trabajando'),
+    cifra(permisos, permisos === 1 ? 'vez pidió permiso' : 'veces pidió permiso'),
+    cifra(github, github === 1 ? 'aviso de GitHub' : 'avisos de GitHub'),
+  );
+  cont.append(cifras);
+
+  const porCarpeta = {};
+  deClaude.forEach((a) => { const k = a.carpeta || 'sin carpeta'; porCarpeta[k] = (porCarpeta[k] || 0) + 1; });
+  const filas = Object.entries(porCarpeta).sort((x, y) => y[1] - x[1]);
+  if (filas.length) {
+    const t = el('section', 'tarjeta');
+    t.append(el('h2', null, 'Tareas por carpeta'), el('p', 'explica', 'Qué ventana terminó más tareas.'));
+    const barras = el('div', 'barras'); const max = filas[0][1];
+    for (const [nombre, n] of filas) {
+      const f = el('div', 'barra-fila');
+      const pista = el('div', 'pista'); const relleno = el('div', 'relleno'); relleno.style.width = `${Math.max(6, (n / max) * 100)}%`; pista.append(relleno);
+      f.append(el('span', 'nombre', nombre), pista, el('span', 'n', String(n)));
+      barras.append(f);
+    }
+    t.append(barras); cont.append(t);
+  }
+
+  const prs = [...new Set(sel.flatMap((a) => [...`${a.titulo} ${a.completo || a.cuerpo || ''}`.matchAll(/#(\d{2,5})\b/g)].map((m) => '#' + m[1])))];
+  if (prs.length) {
+    const t = el('section', 'tarjeta');
+    t.append(el('h2', null, 'PRs mencionados'), el('p', 'explica', 'Números de PR que aparecieron en tus avisos.'));
+    const c = el('div', 'chips'); prs.slice(0, 30).forEach((p) => c.append(el('span', 'chip', p)));
+    t.append(c); cont.append(t);
+  }
+
+  const orden = [...sel].sort((a, b) => a.ts - b.ts);
+  const t = el('section', 'tarjeta');
+  t.append(el('h2', null, 'Horario'));
+  t.append(el('p', 'explica', periodo === '7'
+    ? `${sel.length} avisos en los últimos 7 días.`
+    : `Primer aviso a las ${hora(orden[0].ts)} y el último a las ${hora(orden[orden.length - 1].ts)}.`));
+  cont.append(t);
+}
+document.querySelectorAll('#vista-resumen .segmentos button').forEach((b) => b.addEventListener('click', () => {
+  periodo = b.dataset.periodo;
+  document.querySelectorAll('#vista-resumen .segmentos button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  pintarResumen();
+}));
+
+/* ─── AJUSTES ─── */
+function leerAjustes() {
+  let a = {}; try { a = JSON.parse(guardado('evolve-alerts-ajustes') || '{}'); } catch {}
+  const b = JSON.parse(JSON.stringify(AJUSTES_BASE));
+  return { ...b, ...a, claude: { ...b.claude, ...a.claude }, github: { ...b.github, ...a.github }, suite: { ...b.suite, ...a.suite },
+           noMolestar: { ...b.noMolestar, ...a.noMolestar }, carpetasSilencio: a.carpetasSilencio || [] };
+}
+let ajustes = leerAjustes();
+const marcarPendiente = () => { guardado('evolve-alerts-ajustes-pendiente', '1'); $('cambios-pendientes').hidden = false; };
+
+function pintarAjustes() {
+  ajustes = leerAjustes();
+  $('aj-claude').checked = ajustes.claude.terminar;
+  $('aj-min').value = String(ajustes.claude.minSegundos);
+  $('aj-permisos').checked = ajustes.claude.permisos;
+  $('aj-gh-merge').checked = ajustes.github.merge;
+  $('aj-gh-cambios').checked = ajustes.github.cambios;
+  $('aj-gh-comentarios').checked = ajustes.github.comentarios;
+  $('aj-gh-ci').checked = ajustes.github.ci;
+  $('aj-gh-deploy').checked = ajustes.github.deploy;
+  $('aj-suite').checked = ajustes.suite.libre;
+  $('aj-nm').checked = ajustes.noMolestar.activo;
+  $('aj-nm-desde').value = ajustes.noMolestar.desde;
+  $('aj-nm-hasta').value = ajustes.noMolestar.hasta;
+  $('aj-nm-permisos').checked = ajustes.noMolestar.permisos;
+  $('fila-min').setAttribute('aria-disabled', String(!ajustes.claude.terminar));
+  $('fila-nm').setAttribute('aria-disabled', String(!ajustes.noMolestar.activo));
+  $('cambios-pendientes').hidden = guardado('evolve-alerts-ajustes-pendiente') !== '1';
+  $('nombre-telefono').textContent = `Nombre: ${guardado('evolve-alerts-nombre') || 'sin nombre'}`;
+
+  const carpetas = [...new Set([...cacheAvisos.filter((a) => categoriaDe(a) !== 'github').map((a) => a.carpeta).filter(Boolean), ...ajustes.carpetasSilencio])].sort();
+  const cont = $('aj-carpetas'); cont.replaceChildren();
+  if (!carpetas.length) cont.append(el('span', 'explica', 'Todavía no hay carpetas. Aparecerán cuando te lleguen avisos.'));
+  for (const c of carpetas) {
+    const b = el('button', null, c); b.type = 'button';
+    const silencio = ajustes.carpetasSilencio.includes(c);
+    b.setAttribute('aria-pressed', String(silencio));
+    b.setAttribute('aria-label', `${c}: ${silencio ? 'en silencio' : 'avisando'}`);
+    b.addEventListener('click', () => {
+      const i = ajustes.carpetasSilencio.indexOf(c);
+      if (i >= 0) ajustes.carpetasSilencio.splice(i, 1); else ajustes.carpetasSilencio.push(c);
+      guardarLocal(); pintarAjustes();
+    });
+    cont.append(b);
+  }
+}
+function guardarLocal() { guardado('evolve-alerts-ajustes', JSON.stringify(ajustes)); marcarPendiente(); }
+function leerFormulario() {
+  ajustes.claude.terminar = $('aj-claude').checked;
+  ajustes.claude.minSegundos = Number($('aj-min').value);
+  ajustes.claude.permisos = $('aj-permisos').checked;
+  ajustes.github = { merge: $('aj-gh-merge').checked, cambios: $('aj-gh-cambios').checked, comentarios: $('aj-gh-comentarios').checked,
+                     ci: $('aj-gh-ci').checked, deploy: $('aj-gh-deploy').checked };
+  ajustes.suite.libre = $('aj-suite').checked;
+  ajustes.noMolestar = { activo: $('aj-nm').checked, desde: $('aj-nm-desde').value || '21:00', hasta: $('aj-nm-hasta').value || '08:00',
+                         permisos: $('aj-nm-permisos').checked };
+  guardarLocal();
+  $('fila-min').setAttribute('aria-disabled', String(!ajustes.claude.terminar));
+  $('fila-nm').setAttribute('aria-disabled', String(!ajustes.noMolestar.activo));
+}
+document.querySelectorAll('#vista-ajustes input, #vista-ajustes select').forEach((i) => i.addEventListener('change', leerFormulario));
+$('guardar').addEventListener('click', () => {
+  leerFormulario();
+  $('codigo-ajustes').value = aCodigo({ tipo: 'ajustes', ajustes });
+  $('codigo-ajustes-caja').hidden = false;
+  $('codigo-ajustes-caja').scrollIntoView({ behavior: 'smooth', block: 'start' });
+});
+const ajustesEnviados = () => { guardado('evolve-alerts-ajustes-pendiente', '0'); $('cambios-pendientes').hidden = true; };
+$('copiar-ajustes').addEventListener('click', () => { copiarTexto($('codigo-ajustes').value, $('copiar-ajustes')); ajustesEnviados(); });
+$('compartir-ajustes').addEventListener('click', () => { compartirTexto('Ajustes de Evolve Alerts', $('codigo-ajustes').value, $('copiar-ajustes')); ajustesEnviados(); });
+$('ver-registro').addEventListener('click', () => { ir('registro'); $('ir-avisos').hidden = false; });
+$('borrar').addEventListener('click', async () => {
+  if (!confirm('¿Borrar todos los avisos guardados en este teléfono?')) return;
+  await Historial.borrarTodo(); await marcarLeido(); cacheAvisos = []; ir('avisos');
+});
+
+/* ─── REGISTRO ─── */
+function estado(texto, tipo) { const e = $('estado'); e.hidden = false; e.textContent = texto; e.className = 'estado' + (tipo ? ' ' + tipo : ''); }
+function mostrarCodigo(sub) {
+  const nombre = ($('nombre').value || '').trim() || 'mi teléfono';
+  $('codigo').value = aCodigo({ nombre, suscripcion: sub.toJSON ? sub.toJSON() : sub });
+  $('paso-codigo').hidden = false;
+  guardado('evolve-alerts-nombre', nombre);
+}
+$('activar').addEventListener('click', async () => {
+  $('activar').disabled = true;
+  try {
+    const permiso = await Notification.requestPermission();
+    if (permiso !== 'granted') {
+      estado('No diste permiso. Actívalo en Ajustes del iPhone, Notificaciones, Evolve Alerts, y vuelve a tocar el botón.', 'mal');
+      return;
+    }
+    const registro = await navigator.serviceWorker.ready;
+    let sub = await registro.pushManager.getSubscription();
+    if (!sub) sub = await registro.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: aBytes(LLAVE_PUBLICA) });
+    registrada = true;
+    estado('Listo, este teléfono ya puede recibir avisos.', 'ok');
+    mostrarCodigo(sub);
+    $('ir-avisos').hidden = false;
+  } catch (e) {
+    estado('No se pudo activar: ' + (e && e.message ? e.message : e), 'mal');
+  } finally { $('activar').disabled = false; }
+});
+$('copiar').addEventListener('click', () => copiarTexto($('codigo').value, $('copiar')));
+$('compartir').addEventListener('click', () => compartirTexto('Código de Evolve Alerts', $('codigo').value, $('copiar')));
+$('ir-avisos').addEventListener('click', () => ir('avisos'));
+
+/* ─── arranque ─── */
 async function marcarLeido() {
   try { await Historial.marcarLeidos(); } catch {}
   try { if (navigator.clearAppBadge) await navigator.clearAppBadge(); } catch {}
 }
-
-/* ─── arranque ─── */
+function abrirDesdeHash() {
+  const m = location.hash.match(/^#aviso-(\d+)$/);
+  if (m && registrada) { ir('avisos'); abrirDetalle(m[1]); }
+}
 async function iniciar() {
-  try { $('nombre').value = localStorage.getItem('evolve-alerts-nombre') || ''; } catch {}
-  if (esIOS && !instalada) { verAjustes(); $('paso-instalar').hidden = false; return; }
+  $('nombre').value = guardado('evolve-alerts-nombre') || '';
+  if (esIOS && !instalada) { ir('registro'); $('paso-instalar').hidden = false; return; }
   if (!hayPush) {
-    verAjustes(); $('sin-soporte').hidden = false;
+    ir('registro'); $('sin-soporte').hidden = false;
     $('sin-soporte-texto').textContent = esIOS
       ? 'Actualiza tu iPhone a iOS 16.4 o más nuevo y abre la app desde la pantalla de inicio.'
       : 'Prueba con Chrome en Android, o con Safari en iPhone desde la pantalla de inicio.';
@@ -255,68 +717,29 @@ async function iniciar() {
     estado('Los avisos están activos en este teléfono.', 'ok');
     $('activar').textContent = 'Volver a generar el código';
     mostrarCodigo(actual);
-    verHistorial();
+    await cargar();
+    ir('avisos');
     marcarLeido();
+    abrirDesdeHash();
   } else {
-    verAjustes();
+    ir('registro');
   }
 }
-
-/* ─── eventos ─── */
-$('activar').addEventListener('click', async () => {
-  $('activar').disabled = true;
-  try {
-    const permiso = await Notification.requestPermission();
-    if (permiso !== 'granted') {
-      estado('No diste permiso de notificaciones. Actívalo en Ajustes, Notificaciones, Evolve Alerts, y vuelve a intentar.', 'mal');
-      return;
-    }
-    const registro = await navigator.serviceWorker.ready;
-    let sub = await registro.pushManager.getSubscription();
-    if (!sub) sub = await registro.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: aBytes(LLAVE_PUBLICA) });
-    registrada = true;
-    estado('Listo. Ahora copia tu código y pégalo en tu PC.', 'ok');
-    mostrarCodigo(sub);
-    $('volver-barra').hidden = false; $('paso-historial').hidden = false;
-  } catch (e) {
-    estado('No se pudo activar: ' + (e && e.message ? e.message : e), 'mal');
-  } finally { $('activar').disabled = false; }
-});
-$('copiar').addEventListener('click', async () => {
-  const t = $('codigo').value;
-  try { await navigator.clipboard.writeText(t); } catch { $('codigo').select(); document.execCommand('copy'); }
-  $('copiar').textContent = 'Copiado';
-  setTimeout(() => { $('copiar').textContent = 'Copiar código'; }, 2000);
-});
-$('compartir').addEventListener('click', async () => {
-  const t = $('codigo').value;
-  if (navigator.share) { try { await navigator.share({ title: 'Código de Evolve Alerts', text: t }); } catch {} }
-  else { $('copiar').click(); }
-});
-$('ir-ajustes').addEventListener('click', verAjustes);
-$('volver').addEventListener('click', verHistorial);
-$('borrar').addEventListener('click', async () => {
-  if (!confirm('¿Borrar todos los avisos guardados en este teléfono?')) return;
-  await Historial.borrarTodo(); await marcarLeido(); verHistorial();
-});
-function elegir(f) {
-  filtro = f;
-  $('tab-hoy').setAttribute('aria-selected', String(f === 'hoy'));
-  $('tab-todo').setAttribute('aria-selected', String(f !== 'hoy'));
-  pintarHistorial();
-}
-$('tab-hoy').addEventListener('click', () => elegir('hoy'));
-$('tab-todo').addEventListener('click', () => elegir('todo'));
-
-// Aviso nuevo con la app abierta, o la app vuelve al frente: se refresca sola.
 if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', (e) => {
-  if (e.data && e.data.tipo === 'nuevo-aviso' && registrada) { pintarHistorial(); if (!document.hidden) marcarLeido(); }
+  if (!registrada || !e.data) return;
+  if (e.data.tipo === 'nuevo-aviso') {
+    if (!$('vista-avisos').hidden) pintarAvisos();
+    if (!$('vista-resumen').hidden) pintarResumen();
+    if (!document.hidden) marcarLeido();
+  }
+  if (e.data.tipo === 'abrir') { location.hash = new URL(e.data.url).hash; abrirDesdeHash(); }
 });
+window.addEventListener('hashchange', abrirDesdeHash);
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && registrada) { pintarHistorial(); marcarLeido(); }
+  if (!document.hidden && registrada) { if (!$('vista-avisos').hidden) pintarAvisos(); marcarLeido(); }
 });
 
-iniciar().catch((e) => { verAjustes(); estado('Error al iniciar: ' + e.message, 'mal'); });
+iniciar().catch((e) => { ir('registro'); estado('Error al iniciar: ' + e.message, 'mal'); });
 </script>
 </body>
 </html>
