@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Evolve Alerts</title>
-<meta name="description" content="Avisos de Claude Code y GitHub para el equipo de Evolve Digital.">
+<meta name="description" content="Avisos de Claude Code, GitHub y Sereno para el equipo de Evolve Digital.">
 <meta name="theme-color" content="#2c5c65">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="iconos/favicon-32.png">
@@ -14,10 +14,14 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <style>
   :root {
-    --naranja:#ff6b00; --naranja-suave:#fff1e6; --naranja-texto:#b54a00;
+    /* Un color por servicio: Claude naranja, GitHub morado, Sereno azul noche. */
+    --claude:#e8650a; --claude-suave:#fff0e3; --claude-texto:#a84a05;
+    --github:#6e40c9; --github-suave:#f1ebfc; --github-texto:#5a32a8;
+    --sereno:#27306b; --sereno-suave:#e8eaf6; --sereno-texto:#27306b; --sereno-estrella:#f2c94c;
     --petroleo:#2c5c65; --petroleo-suave:#eaf1f2;
-    --morado:#5b4bb7; --morado-suave:#efedfb;
     --verde:#1f7a4d; --verde-suave:#e7f4ec;
+    --ambar:#9a6200; --ambar-suave:#fdf3dc;
+    --rojo:#b3261e; --rojo-suave:#fdeceb;
     --tinta:#1d2b2f; --suave:#5d6f73; --fondo:#f6f7f7; --linea:#dfe5e6; --blanco:#fff;
   }
   * { box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
@@ -29,62 +33,113 @@
   [hidden] { display:none !important; }
   .vista { display:flex; flex-direction:column; gap:14px; }
 
-  /* tipografía y piezas */
-  h1 { font-size:24px; margin:0; color:var(--petroleo); }
+  h1 { font-size:24px; margin:0; color:var(--petroleo); text-wrap:balance; }
   h2 { font-size:17px; margin:0; }
+  h3 { font-size:14px; margin:0; color:var(--suave); text-transform:uppercase; letter-spacing:.5px; }
   .explica { margin:0; color:var(--suave); font-size:14px; }
   .tarjeta { background:var(--blanco); border:1px solid var(--linea); border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:12px; }
   label.campo { font-size:14px; color:var(--suave); display:flex; flex-direction:column; gap:6px; }
   input[type=text], input[type=search], input[type=time], select, textarea {
     font:inherit; border:1px solid var(--linea); border-radius:10px; padding:11px 12px; width:100%; background:var(--blanco); color:var(--tinta); }
+  input.codigo { font:600 22px/1.2 ui-monospace, Menlo, monospace; letter-spacing:3px; text-align:center; text-transform:uppercase; }
   textarea { font:13px/1.4 ui-monospace, Menlo, monospace; min-height:110px; resize:vertical; word-break:break-all; }
-  button { font:inherit; font-weight:600; border:0; border-radius:12px; padding:13px 16px; cursor:pointer; background:var(--naranja); color:#fff; }
+  button { font:inherit; font-weight:600; border:0; border-radius:12px; padding:13px 16px; cursor:pointer; background:var(--petroleo); color:#fff; }
   button.secundario { background:var(--blanco); color:var(--petroleo); border:1px solid var(--petroleo); }
-  button.texto { background:none; color:var(--petroleo); padding:8px 4px; }
+  button.peligro { background:var(--blanco); color:var(--rojo); border:1px solid #efc3bf; }
+  button.chico { padding:7px 12px; font-size:14px; border-radius:10px; }
   button:disabled { opacity:.55; cursor:default; }
-  :focus-visible { outline:3px solid rgba(255,107,0,.4); outline-offset:2px; }
+  :focus-visible { outline:3px solid rgba(44,92,101,.45); outline-offset:2px; }
   .fila { display:flex; gap:10px; flex-wrap:wrap; } .fila > * { flex:1 1 140px; }
   .estado { font-size:14px; padding:10px 12px; border-radius:10px; background:var(--petroleo-suave); color:var(--petroleo); }
-  .estado.ok { background:var(--verde-suave); color:var(--verde); } .estado.mal { background:#fdeceb; color:#a0322b; }
+  .estado.ok { background:var(--verde-suave); color:var(--verde); } .estado.mal { background:var(--rojo-suave); color:var(--rojo); }
 
-  /* encabezado de cada pestaña */
   .cabeza { display:flex; align-items:center; gap:10px; }
   .cabeza img { width:32px; height:32px; border-radius:8px; }
-  .cabeza h1 { font-size:21px; }
+  .cabeza h1 { font-size:21px; flex:1; }
+  .cabeza .luna { width:32px; height:32px; border-radius:8px; background:var(--sereno); display:grid; place-items:center; color:var(--sereno-estrella); }
+  .cabeza .luna svg { width:18px; height:18px; }
 
-  /* barra de pestañas de abajo */
+  /* barra de pestañas */
   nav.barra { position:fixed; left:0; right:0; bottom:0; background:rgba(255,255,255,.96); border-top:1px solid var(--linea);
-              padding:6px 8px calc(6px + env(safe-area-inset-bottom)); display:flex; justify-content:center; backdrop-filter:blur(8px); }
-  nav.barra .dentro { display:flex; gap:4px; width:100%; max-width:560px; }
-  nav.barra button { flex:1; background:none; color:var(--suave); padding:8px 4px 6px; border-radius:10px; font-size:12px; font-weight:600;
-                     display:flex; flex-direction:column; align-items:center; gap:3px; }
+              padding:6px 8px calc(6px + env(safe-area-inset-bottom)); display:flex; justify-content:center; backdrop-filter:blur(8px); z-index:10; }
+  nav.barra .dentro { display:flex; gap:2px; width:100%; max-width:560px; }
+  nav.barra button { flex:1; background:none; color:var(--suave); padding:8px 2px 6px; border-radius:10px; font-size:12px; font-weight:600;
+                     display:flex; flex-direction:column; align-items:center; gap:3px; position:relative; }
   nav.barra button svg { width:24px; height:24px; }
-  nav.barra button[aria-current="page"] { color:var(--naranja); }
+  nav.barra button[aria-current="page"] { color:var(--petroleo); }
+  nav.barra .punto { position:absolute; top:6px; left:calc(50% + 8px); width:9px; height:9px; border-radius:50%; background:var(--rojo); border:2px solid #fff; }
 
-  /* segmentos (Hoy / 30 días) */
   .segmentos { display:flex; gap:4px; background:#e9eeee; padding:4px; border-radius:12px; }
   .segmentos button { flex:1; background:none; color:var(--suave); padding:8px 6px; border-radius:9px; font-size:15px; }
   .segmentos button[aria-pressed="true"] { background:var(--blanco); color:var(--tinta); box-shadow:0 1px 2px rgba(0,0,0,.08); }
 
-  /* lista de avisos */
+  /* filtros por servicio */
+  .filtros { display:flex; gap:8px; overflow-x:auto; padding-bottom:2px; scrollbar-width:none; }
+  .filtros::-webkit-scrollbar { display:none; }
+  .filtros button { flex:none; background:var(--blanco); color:var(--tinta); border:1px solid var(--linea); border-radius:999px; padding:7px 14px; font-size:14px;
+                    display:inline-flex; align-items:center; gap:7px; }
+  .filtros button .pastilla { width:9px; height:9px; border-radius:50%; }
+  .filtros button[aria-pressed="true"] { background:var(--tinta); color:#fff; border-color:var(--tinta); }
+
+  /* avisos */
   .dia { font-size:13px; font-weight:700; color:var(--suave); text-transform:uppercase; letter-spacing:.6px; margin:4px 2px 0; }
   .lista { list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:10px; }
   .aviso { width:100%; text-align:left; background:var(--blanco); color:var(--tinta); border:1px solid var(--linea); border-radius:14px; padding:13px 14px;
            display:grid; grid-template-columns:auto 1fr; gap:4px 12px; font-weight:400; }
-  .icono-cat { grid-row:span 3; width:34px; height:34px; border-radius:10px; display:grid; place-items:center; font-size:12px; font-weight:800; }
-  .icono-cat svg { width:18px; height:18px; }
-  .cat-claude { background:var(--petroleo-suave); color:var(--petroleo); }
-  .cat-permiso { background:var(--naranja-suave); color:var(--naranja-texto); }
-  .cat-github { background:var(--morado-suave); color:var(--morado); }
-  .cat-suite, .cat-prueba { background:var(--verde-suave); color:var(--verde); }
+  .icono-cat { grid-row:span 3; width:36px; height:36px; border-radius:11px; display:grid; place-items:center; }
+  .icono-cat svg { width:19px; height:19px; }
+  .cat-claude, .cat-permiso { background:var(--claude-suave); color:var(--claude-texto); }
+  .cat-permiso { background:var(--claude); color:#fff; }
+  .cat-github { background:var(--github-suave); color:var(--github-texto); }
+  .cat-sereno { background:var(--sereno); color:var(--sereno-estrella); }
+  .cat-suite, .cat-prueba { background:var(--petroleo-suave); color:var(--petroleo); }
   .aviso .arriba { display:flex; justify-content:space-between; gap:10px; align-items:baseline; }
   .aviso .titulo { font-weight:600; font-size:15px; overflow-wrap:anywhere; }
   .aviso .hora { font-size:13px; color:var(--suave); white-space:nowrap; font-variant-numeric:tabular-nums; }
   .aviso .cuerpo { font-size:14px; color:var(--suave); overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; }
   .chips { display:flex; gap:6px; flex-wrap:wrap; }
   .chip { font-size:12px; padding:2px 9px; border-radius:999px; background:var(--petroleo-suave); color:var(--petroleo); font-weight:600; }
+  .chip.c-claude, .chip.c-permiso { background:var(--claude-suave); color:var(--claude-texto); }
+  .chip.c-github { background:var(--github-suave); color:var(--github-texto); }
+  .chip.c-sereno { background:var(--sereno-suave); color:var(--sereno-texto); }
   .vacio { text-align:center; color:var(--suave); padding:32px 16px; background:var(--blanco); border:1px dashed var(--linea); border-radius:14px; }
   .vacio b { display:block; color:var(--tinta); margin-bottom:4px; }
+
+  /* Sereno */
+  .noche { background:var(--sereno); color:#dfe3ff; border-radius:16px; padding:16px; display:flex; flex-direction:column; gap:4px; }
+  .noche b { color:#fff; font-size:18px; }
+  .noche span { font-size:14px; }
+  .sistema { background:var(--blanco); border:1px solid var(--linea); border-radius:16px; overflow:hidden; }
+  .sistema > .encabezado { padding:14px 16px; display:flex; flex-direction:column; gap:8px; }
+  .sistema .nombre-fila { display:flex; justify-content:space-between; align-items:center; gap:10px; }
+  .sistema .nombre-fila h2 { font-size:17px; }
+  .sello { flex:none; font-size:13px; font-weight:700; padding:3px 10px; border-radius:999px; white-space:nowrap; }
+  .sello.bien { background:var(--verde-suave); color:var(--verde); }
+  .sello.aviso { background:var(--ambar-suave); color:var(--ambar); }
+  .sello.mal { background:var(--rojo-suave); color:var(--rojo); }
+  .sello.gris { background:#eef1f1; color:var(--suave); }
+  .sistema .meta { font-size:13px; color:var(--suave); }
+  .medidores { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+  .medidor { display:flex; flex-direction:column; gap:5px; font-size:13px; color:var(--suave); }
+  .medidor b { color:var(--tinta); font-size:15px; font-variant-numeric:tabular-nums; }
+  .medidor .pista { height:6px; border-radius:99px; background:#eef1f1; overflow:hidden; }
+  .medidor .relleno { height:100%; border-radius:99px; background:var(--verde); }
+  .medidor .relleno.con-fallas { background:var(--ambar); }
+  details.bloque { border-top:1px solid var(--linea); }
+  details.bloque summary { list-style:none; cursor:pointer; padding:12px 16px; display:flex; justify-content:space-between; align-items:center; font-weight:600; font-size:15px; }
+  details.bloque summary::-webkit-details-marker { display:none; }
+  details.bloque summary .cuantos { font-size:13px; font-weight:700; padding:1px 9px; border-radius:999px; background:#eef1f1; color:var(--suave); }
+  details.bloque summary .cuantos.rojo { background:var(--rojo-suave); color:var(--rojo); }
+  details.bloque summary .cuantos.ambar { background:var(--ambar-suave); color:var(--ambar); }
+  details.bloque summary .cuantos.verde { background:var(--verde-suave); color:var(--verde); }
+  details.bloque summary::after { content:'›'; font-size:20px; color:var(--suave); margin-left:8px; transition:transform .15s; }
+  details.bloque[open] summary::after { transform:rotate(90deg); }
+  details.bloque summary .izq { display:flex; align-items:center; gap:8px; flex:1; }
+  .renglones { list-style:none; margin:0; padding:0 16px 14px; display:flex; flex-direction:column; gap:10px; }
+  .renglones li { display:flex; flex-direction:column; gap:3px; font-size:14px; }
+  .renglones li b { font-weight:600; }
+  .renglones code { font:12px ui-monospace, Menlo, monospace; color:var(--suave); overflow-wrap:anywhere; }
+  .renglones pre { margin:4px 0 0; white-space:pre-wrap; overflow-wrap:anywhere; font:12px/1.45 ui-monospace, Menlo, monospace; background:var(--fondo); border-radius:8px; padding:8px 10px; max-height:200px; overflow:auto; }
 
   /* resumen */
   .cifras { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
@@ -95,10 +150,15 @@
   .barra-fila { display:grid; grid-template-columns:110px 1fr 34px; gap:10px; align-items:center; font-size:14px; }
   .barra-fila .nombre { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
   .barra-fila .pista { height:10px; background:#eef2f2; border-radius:999px; overflow:hidden; }
-  .barra-fila .relleno { height:100%; background:var(--petroleo); border-radius:999px; }
+  .barra-fila .relleno { height:100%; background:var(--claude); border-radius:999px; }
   .barra-fila .n { text-align:right; font-variant-numeric:tabular-nums; color:var(--suave); }
 
   /* ajustes */
+  .guardado { font-size:13px; font-weight:600; color:var(--suave); display:flex; align-items:center; gap:6px; }
+  .guardado.ok { color:var(--verde); } .guardado.mal { color:var(--rojo); }
+  .servicio-titulo { display:flex; align-items:center; gap:10px; }
+  .servicio-titulo .icono-cat { grid-row:auto; width:30px; height:30px; border-radius:9px; }
+  .servicio-titulo .icono-cat svg { width:16px; height:16px; }
   .opcion { display:flex; align-items:center; justify-content:space-between; gap:14px; padding:4px 0; }
   .opcion + .opcion { border-top:1px solid #eef2f2; padding-top:12px; }
   .opcion .txt { display:flex; flex-direction:column; }
@@ -110,74 +170,69 @@
   .interruptor .pista::after { content:''; position:absolute; top:3px; left:3px; width:26px; height:26px; border-radius:50%; background:#fff; box-shadow:0 1px 3px rgba(0,0,0,.25); transition:transform .15s; }
   .interruptor input:checked + .pista { background:var(--verde); }
   .interruptor input:checked + .pista::after { transform:translateX(20px); }
-  .interruptor input:focus-visible + .pista { outline:3px solid rgba(255,107,0,.4); outline-offset:2px; }
+  .interruptor input:focus-visible + .pista { outline:3px solid rgba(44,92,101,.45); outline-offset:2px; }
   .sub-opcion { padding-left:4px; }
   .sub-opcion[aria-disabled="true"] { opacity:.45; pointer-events:none; }
+  .grupo { border-top:1px solid #eef2f2; margin-top:4px; padding-top:8px; display:flex; flex-direction:column; gap:8px; }
   .carpetas { display:flex; gap:8px; flex-wrap:wrap; }
   .carpetas button { background:var(--blanco); color:var(--tinta); border:1px solid var(--linea); padding:8px 12px; border-radius:999px; font-size:14px; font-weight:600; }
-  .carpetas button[aria-pressed="true"] { background:#fdeceb; border-color:#f3b8b3; color:#a0322b; text-decoration:line-through; }
-  .aviso-cambios { background:var(--naranja-suave); color:var(--naranja-texto); border:1px solid #ffd3b0; border-radius:14px; padding:12px 14px; font-size:14px; }
+  .carpetas button[aria-pressed="true"] { background:var(--rojo-suave); border-color:#f3b8b3; color:var(--rojo); text-decoration:line-through; }
   .pasos { margin:0; padding-left:22px; display:flex; flex-direction:column; gap:6px; font-size:14px; }
   code.cmd { display:block; background:#1d2b2f; color:#fff; border-radius:10px; padding:10px 12px; font:14px ui-monospace, Menlo, monospace; }
   .portada { display:flex; flex-direction:column; align-items:center; gap:10px; text-align:center; padding-top:8px; }
   .portada img { width:220px; max-width:100%; height:auto; }
+  .persona { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:10px 0; border-top:1px solid #eef2f2; }
+  .persona:first-child { border-top:0; }
+  .persona .txt { display:flex; flex-direction:column; min-width:0; }
+  .persona .txt b { font-size:15px; }
+  .persona .txt span { font-size:13px; color:var(--suave); overflow-wrap:anywhere; }
+  .invitacion-lista { background:var(--sereno-suave); border-radius:14px; padding:14px; display:flex; flex-direction:column; gap:10px; text-align:center; }
+  .invitacion-lista .grande { font:700 30px/1.1 ui-monospace, Menlo, monospace; letter-spacing:4px; color:var(--sereno); }
 
-  /* detalle de un aviso */
+  /* detalle */
   .velo { position:fixed; inset:0; background:rgba(20,30,33,.45); display:flex; align-items:flex-end; justify-content:center; z-index:20; }
   .hoja { background:var(--blanco); width:100%; max-width:560px; max-height:88vh; overflow:auto; border-radius:20px 20px 0 0;
           padding:18px 18px calc(20px + env(safe-area-inset-bottom)); display:flex; flex-direction:column; gap:12px; }
   .hoja .asa { width:40px; height:5px; border-radius:99px; background:#d5dcdd; align-self:center; }
   .hoja .completo { white-space:pre-wrap; overflow-wrap:anywhere; font-size:15px; line-height:1.55; background:var(--fondo); border-radius:12px; padding:12px; }
   .hoja .meta { font-size:13px; color:var(--suave); }
+
+  /* aviso flotante */
+  .brindis { position:fixed; left:50%; bottom:calc(84px + env(safe-area-inset-bottom)); transform:translateX(-50%); background:var(--tinta); color:#fff;
+             padding:10px 16px; border-radius:12px; font-size:14px; font-weight:600; z-index:30; max-width:calc(100% - 32px); box-shadow:0 6px 20px rgba(0,0,0,.18); }
   @media (prefers-reduced-motion: reduce) { * { transition:none !important; } }
 </style>
 </head>
 <body class="sin-barra">
 <main>
 
-<!-- ═════════════ REGISTRO (primera vez) ═════════════ -->
+<!-- ═════════════ REGISTRO ═════════════ -->
 <section class="vista" id="vista-registro" hidden>
   <header class="portada">
     <img src="iconos/evolve-horizontal.png" alt="Evolve Digital">
     <h1>Evolve Alerts</h1>
-    <p class="explica">Te avisa en este teléfono cuando Claude termina, cuando te pide permiso y lo que pasa en GitHub.</p>
+    <p class="explica">Los avisos del equipo en tu teléfono: cuando Claude termina, lo que pasa con tus PRs en GitHub y cómo amanecieron los sistemas con Sereno.</p>
   </header>
 
   <section class="tarjeta" id="paso-instalar" hidden>
-    <h2>Paso 1: ponla en tu pantalla de inicio</h2>
+    <h2>Primero: ponla en tu pantalla de inicio</h2>
     <ol class="pasos">
       <li>Abre esta página en <strong>Safari</strong>.</li>
       <li>Toca <strong>Compartir</strong> (el cuadrito con la flecha hacia arriba).</li>
       <li>Elige <strong>Agregar a inicio</strong>.</li>
       <li>Abre <strong>Evolve Alerts</strong> desde el ícono nuevo.</li>
     </ol>
-    <p class="explica">El iPhone sólo deja mandar avisos a las apps que abres desde la pantalla de inicio.</p>
+    <p class="explica">El iPhone sólo deja mandar avisos a las apps que abres desde la pantalla de inicio. Ten a la mano tu código de invitación: lo vas a escribir al abrirla.</p>
   </section>
 
   <section class="tarjeta" id="paso-activar" hidden>
-    <h2>Paso 2: activa los avisos</h2>
-    <label class="campo" for="nombre">Ponle un nombre a este teléfono
-      <input id="nombre" type="text" placeholder="Ej. iPhone de Roberto" autocomplete="off">
+    <h2>Activa tus avisos</h2>
+    <label class="campo" for="invitacion">Tu código de invitación
+      <input id="invitacion" class="codigo" type="text" placeholder="XXXX-XXXX" autocomplete="one-time-code" autocapitalize="characters" spellcheck="false" maxlength="9">
     </label>
+    <p class="explica">Te lo da quien te invitó. Sirve una sola vez y vence en 7 días.</p>
     <button id="activar" type="button">Activar avisos</button>
     <div class="estado" id="estado" role="status" hidden></div>
-  </section>
-
-  <section class="tarjeta" id="paso-codigo" hidden>
-    <h2>Paso 3: pasa tu código a la PC</h2>
-    <ol class="pasos">
-      <li>Toca <strong>Enviar a mi PC</strong> y mándatelo por WhatsApp.</li>
-      <li>En la PC, copia el código y escribe en la terminal:</li>
-    </ol>
-    <code class="cmd">evolve-alerts pegar</code>
-    <label class="campo" for="codigo">Tu código (es personal, no lo compartas)
-      <textarea id="codigo" readonly></textarea>
-    </label>
-    <div class="fila">
-      <button id="compartir" type="button">Enviar a mi PC</button>
-      <button id="copiar" class="secundario" type="button">Copiar</button>
-    </div>
-    <button id="ir-avisos" class="secundario" type="button" hidden>Listo, ir a mis avisos</button>
   </section>
 
   <section class="tarjeta" id="sin-soporte" hidden>
@@ -186,11 +241,16 @@
   </section>
 </section>
 
-<!-- ═════════════ PESTAÑA: AVISOS ═════════════ -->
+<!-- ═════════════ AVISOS ═════════════ -->
 <section class="vista" id="vista-avisos" hidden>
-  <div class="cabeza"><img src="iconos/icono-192.png" alt=""><h1>Mis avisos</h1></div>
-  <p class="explica">Todo lo que te ha llegado a este teléfono. Toca uno para leerlo completo.</p>
-  <input id="buscar" type="search" placeholder="Buscar, por ejemplo: PR #345 o operacion" aria-label="Buscar en mis avisos" autocomplete="off">
+  <div class="cabeza"><img src="iconos/icono-192.png" alt=""><h1>Avisos</h1></div>
+  <div class="filtros" role="group" aria-label="Qué servicio ver" id="filtros">
+    <button type="button" data-filtro="todos" aria-pressed="true">Todos</button>
+    <button type="button" data-filtro="claude" aria-pressed="false"><span class="pastilla" style="background:var(--claude)"></span>Claude</button>
+    <button type="button" data-filtro="github" aria-pressed="false"><span class="pastilla" style="background:var(--github)"></span>GitHub</button>
+    <button type="button" data-filtro="sereno" aria-pressed="false"><span class="pastilla" style="background:var(--sereno)"></span>Sereno</button>
+  </div>
+  <input id="buscar" type="search" placeholder="Buscar, por ejemplo: PR #345" aria-label="Buscar en mis avisos" autocomplete="off">
   <div class="segmentos" role="group" aria-label="Qué días ver">
     <button type="button" id="ver-hoy" aria-pressed="true">Hoy</button>
     <button type="button" id="ver-todo" aria-pressed="false">Últimos 30 días</button>
@@ -198,10 +258,18 @@
   <div id="lista-avisos" class="vista" style="gap:10px"></div>
 </section>
 
-<!-- ═════════════ PESTAÑA: RESUMEN ═════════════ -->
+<!-- ═════════════ SERENO ═════════════ -->
+<section class="vista" id="vista-sereno" hidden>
+  <div class="cabeza"><span class="luna" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg></span><h1>Sereno</h1>
+    <button type="button" class="secundario chico" id="sereno-recargar">Actualizar</button></div>
+  <div id="sereno-noche" class="noche" hidden></div>
+  <div id="sereno-sistemas" class="vista"></div>
+  <p class="explica">Cada madrugada Sereno recorre cada sistema en una copia de pruebas, compara contra la noche anterior y te avisa a las 7:30. Elige de qué sistemas quieres el aviso en Ajustes.</p>
+</section>
+
+<!-- ═════════════ RESUMEN ═════════════ -->
 <section class="vista" id="vista-resumen" hidden>
   <div class="cabeza"><img src="iconos/icono-192.png" alt=""><h1>Resumen</h1></div>
-  <p class="explica">Cuánto trabajaron tus ventanas de Claude y qué pasó en GitHub.</p>
   <div class="segmentos" role="group" aria-label="Qué periodo resumir">
     <button type="button" data-periodo="hoy" aria-pressed="true">Hoy</button>
     <button type="button" data-periodo="ayer" aria-pressed="false">Ayer</button>
@@ -210,112 +278,147 @@
   <div id="contenido-resumen" class="vista"></div>
 </section>
 
-<!-- ═════════════ PESTAÑA: AJUSTES ═════════════ -->
+<!-- ═════════════ AJUSTES ═════════════ -->
 <section class="vista" id="vista-ajustes" hidden>
-  <div class="cabeza"><img src="iconos/icono-192.png" alt=""><h1>Ajustes</h1></div>
-  <p class="explica">Elige qué avisos quieres recibir. Cuando termines, toca <b>Guardar y mandar a mi PC</b>.</p>
-
-  <div class="aviso-cambios" id="cambios-pendientes" hidden>Tienes cambios sin mandar a tu PC. Hasta que lo hagas, tu PC sigue usando los ajustes de antes.</div>
+  <div class="cabeza"><img src="iconos/icono-192.png" alt=""><h1>Ajustes</h1><span class="guardado" id="guardado" role="status" aria-live="polite"></span></div>
+  <p class="explica">Los cambios se guardan solos y valen desde el siguiente aviso.</p>
 
   <section class="tarjeta">
-    <h2>Claude</h2>
-    <p class="explica">Las ventanas de Claude Code en tu PC.</p>
+    <div class="servicio-titulo" id="titulo-claude"><h2>Claude</h2></div>
     <div class="opcion">
-      <div class="txt"><b>Cuando termina una tarea</b><span>Te avisa cuando una ventana acaba de responder.</span></div>
-      <label class="interruptor"><input type="checkbox" id="aj-claude" aria-label="Avisar cuando Claude termina una tarea"><span class="pista"></span></label>
+      <div class="txt"><b>Avisos de Claude</b><span>De las ventanas de Claude Code de tu PC. Necesitan tu PC conectada (abajo, en Este teléfono).</span></div>
+      <label class="interruptor"><input type="checkbox" id="aj-claude-activo" aria-label="Recibir avisos de Claude"><span class="pista"></span></label>
     </div>
-    <div class="opcion sub-opcion" id="fila-min">
-      <label class="campo" for="aj-min" style="flex:1">Sólo si tardó más de
-        <select id="aj-min">
-          <option value="0">Avisarme siempre</option>
-          <option value="30">30 segundos</option>
-          <option value="60">1 minuto</option>
-          <option value="90">1 minuto y medio</option>
-          <option value="120">2 minutos</option>
-          <option value="300">5 minutos</option>
-          <option value="600">10 minutos</option>
-        </select>
-      </label>
-    </div>
-    <div class="opcion">
-      <div class="txt"><b>Cuando te pide permiso</b><span>Una ventana se detuvo y necesita que le digas que sí o que no.</span></div>
-      <label class="interruptor"><input type="checkbox" id="aj-permisos" aria-label="Avisar cuando Claude pide permiso"><span class="pista"></span></label>
+    <div class="sub-opcion grupo" id="grupo-claude">
+      <div class="opcion">
+        <div class="txt"><b>Cuando termina una tarea</b><span>Una ventana acaba de responder.</span></div>
+        <label class="interruptor"><input type="checkbox" id="aj-claude" aria-label="Avisar cuando Claude termina una tarea"><span class="pista"></span></label>
+      </div>
+      <div class="sub-opcion" id="fila-min">
+        <label class="campo" for="aj-min">Sólo si tardó más de
+          <select id="aj-min">
+            <option value="0">Avisarme siempre</option>
+            <option value="30">30 segundos</option>
+            <option value="60">1 minuto</option>
+            <option value="90">1 minuto y medio</option>
+            <option value="120">2 minutos</option>
+            <option value="300">5 minutos</option>
+            <option value="600">10 minutos</option>
+          </select>
+        </label>
+      </div>
+      <div class="opcion">
+        <div class="txt"><b>Cuando te pide permiso</b><span>Una ventana se detuvo y espera tu sí o tu no.</span></div>
+        <label class="interruptor"><input type="checkbox" id="aj-permisos" aria-label="Avisar cuando Claude pide permiso"><span class="pista"></span></label>
+      </div>
+      <div class="opcion" style="flex-direction:column; align-items:stretch">
+        <div class="txt"><b>Carpetas en silencio</b><span>Toca una carpeta para que deje de avisarte; tócala otra vez para que vuelva.</span></div>
+        <div class="carpetas" id="aj-carpetas"></div>
+      </div>
     </div>
   </section>
 
   <section class="tarjeta">
-    <h2>Carpetas en silencio</h2>
-    <p class="explica">Toca una carpeta de Claude para que deje de avisarte. Tócala otra vez para que vuelva a avisarte. Aparecen aquí las que ya te han mandado avisos.</p>
-    <div class="carpetas" id="aj-carpetas"></div>
+    <div class="servicio-titulo" id="titulo-github"><h2>GitHub</h2></div>
+    <div class="opcion"><div class="txt"><b>Avisos de GitHub</b><span id="gh-explica">Se revisan tus PRs cada 3 minutos, aunque tu PC esté apagada.</span></div>
+      <label class="interruptor"><input type="checkbox" id="aj-gh-activo" aria-label="Recibir avisos de GitHub"><span class="pista"></span></label></div>
+    <div class="sub-opcion grupo" id="grupo-gh">
+      <div class="opcion"><div class="txt"><b>Mergearon tu PR</b><span>Tu cambio ya entró al proyecto.</span></div>
+        <label class="interruptor"><input type="checkbox" id="aj-gh-merge" aria-label="Avisar cuando mergean tu PR"><span class="pista"></span></label></div>
+      <div class="opcion"><div class="txt"><b>Te pidieron cambios</b><span>Alguien revisó tu PR y quiere que corrijas algo.</span></div>
+        <label class="interruptor"><input type="checkbox" id="aj-gh-cambios" aria-label="Avisar cuando te piden cambios"><span class="pista"></span></label></div>
+      <div class="opcion"><div class="txt"><b>Comentaron tu PR</b><span>Alguien escribió en tu PR.</span></div>
+        <label class="interruptor"><input type="checkbox" id="aj-gh-comentarios" aria-label="Avisar cuando comentan tu PR"><span class="pista"></span></label></div>
+      <div class="opcion"><div class="txt"><b>Falló la revisión automática</b><span>Las pruebas automáticas de tu PR salieron en rojo.</span></div>
+        <label class="interruptor"><input type="checkbox" id="aj-gh-ci" aria-label="Avisar cuando falla la revisión automática"><span class="pista"></span></label></div>
+      <div class="opcion"><div class="txt"><b>Terminó un deploy</b><span>Se subió una versión nueva a producción, o falló al subirse.</span></div>
+        <label class="interruptor"><input type="checkbox" id="aj-gh-deploy" aria-label="Avisar cuando termina un deploy"><span class="pista"></span></label></div>
+    </div>
   </section>
 
   <section class="tarjeta">
-    <h2>GitHub</h2>
-    <p class="explica">Tu PC revisa GitHub cada 3 minutos con tu cuenta. Si tu PC está apagada, te avisa cuando la prendas.</p>
-    <div class="opcion"><div class="txt"><b>Mergearon tu PR</b><span>Tu cambio ya entró al proyecto.</span></div>
-      <label class="interruptor"><input type="checkbox" id="aj-gh-merge" aria-label="Avisar cuando mergean tu PR"><span class="pista"></span></label></div>
-    <div class="opcion"><div class="txt"><b>Te pidieron cambios</b><span>Alguien revisó tu PR y quiere que corrijas algo.</span></div>
-      <label class="interruptor"><input type="checkbox" id="aj-gh-cambios" aria-label="Avisar cuando te piden cambios"><span class="pista"></span></label></div>
-    <div class="opcion"><div class="txt"><b>Comentaron tu PR</b><span>Alguien escribió en tu PR.</span></div>
-      <label class="interruptor"><input type="checkbox" id="aj-gh-comentarios" aria-label="Avisar cuando comentan tu PR"><span class="pista"></span></label></div>
-    <div class="opcion"><div class="txt"><b>Falló la revisión automática</b><span>Las pruebas automáticas de tu PR salieron en rojo.</span></div>
-      <label class="interruptor"><input type="checkbox" id="aj-gh-ci" aria-label="Avisar cuando falla la revisión automática"><span class="pista"></span></label></div>
-    <div class="opcion"><div class="txt"><b>Terminó un deploy</b><span>Se subió una versión nueva a producción, o falló al subirse.</span></div>
-      <label class="interruptor"><input type="checkbox" id="aj-gh-deploy" aria-label="Avisar cuando termina un deploy"><span class="pista"></span></label></div>
+    <div class="servicio-titulo" id="titulo-sereno"><h2>Sereno</h2></div>
+    <div class="opcion"><div class="txt"><b>El aviso de cada mañana</b><span>A las 7:30, un solo aviso con cómo amanecieron los sistemas que elijas.</span></div>
+      <label class="interruptor"><input type="checkbox" id="aj-sereno" aria-label="Recibir el aviso de Sereno"><span class="pista"></span></label></div>
+    <div class="sub-opcion grupo" id="grupo-sereno">
+      <span class="explica">Sistemas que quieres en el aviso:</span>
+      <div id="aj-sereno-sistemas" class="vista" style="gap:8px"></div>
+    </div>
   </section>
 
   <section class="tarjeta">
     <h2>Suite de pruebas</h2>
-    <p class="explica">Sólo sirve si en tu PC corren los carriles del ERP.</p>
-    <div class="opcion"><div class="txt"><b>Cuando la suite queda libre</b><span>Te avisa quién la usó y cuánto tardó.</span></div>
+    <div class="opcion"><div class="txt"><b>Cuando la suite queda libre</b><span>Sólo si en tu PC corren los carriles del ERP.</span></div>
       <label class="interruptor"><input type="checkbox" id="aj-suite" aria-label="Avisar cuando la suite queda libre"><span class="pista"></span></label></div>
   </section>
 
   <section class="tarjeta">
     <h2>No molestar</h2>
-    <p class="explica">En estas horas tu teléfono no suena. En la PC sí te siguen saliendo los avisos.</p>
-    <div class="opcion"><div class="txt"><b>Activar no molestar</b><span>Por ejemplo, de noche.</span></div>
+    <div class="opcion"><div class="txt"><b>Activar no molestar</b><span>En estas horas tu teléfono no suena.</span></div>
       <label class="interruptor"><input type="checkbox" id="aj-nm" aria-label="Activar no molestar"><span class="pista"></span></label></div>
     <div class="sub-opcion" id="fila-nm">
       <div class="fila">
         <label class="campo" for="aj-nm-desde">Desde las <input id="aj-nm-desde" type="time"></label>
         <label class="campo" for="aj-nm-hasta">Hasta las <input id="aj-nm-hasta" type="time"></label>
       </div>
-      <div class="opcion" style="margin-top:10px"><div class="txt"><b>Pero sí avísame si pide permiso</b><span>Para que ninguna ventana se quede esperándote toda la noche.</span></div>
+      <div class="opcion" style="margin-top:10px"><div class="txt"><b>Pero sí avísame si Claude pide permiso</b><span>Para que ninguna ventana se quede esperándote toda la noche.</span></div>
         <label class="interruptor"><input type="checkbox" id="aj-nm-permisos" aria-label="En no molestar, sí avisar permisos"><span class="pista"></span></label></div>
     </div>
   </section>
 
-  <button id="guardar" type="button">Guardar y mandar a mi PC</button>
-
-  <section class="tarjeta" id="codigo-ajustes-caja" hidden>
-    <h2>Manda tus ajustes a tu PC</h2>
-    <ol class="pasos">
-      <li>Toca <strong>Enviar a mi PC</strong> y mándatelo por WhatsApp.</li>
-      <li>En la PC, copia el código y escribe en la terminal:</li>
-    </ol>
-    <code class="cmd">evolve-alerts pegar</code>
-    <label class="campo" for="codigo-ajustes">Código de ajustes
-      <textarea id="codigo-ajustes" readonly></textarea>
-    </label>
+  <section class="tarjeta" id="equipo" hidden>
+    <h2>Equipo</h2>
+    <p class="explica">Invita a alguien: le llegarán sus avisos de GitHub y los de Sereno, nunca los tuyos.</p>
     <div class="fila">
-      <button id="compartir-ajustes" type="button">Enviar a mi PC</button>
-      <button id="copiar-ajustes" class="secundario" type="button">Copiar</button>
+      <label class="campo" for="inv-nombre">Nombre <input id="inv-nombre" type="text" placeholder="Carlos" autocomplete="off"></label>
+      <label class="campo" for="inv-github">Usuario de GitHub <input id="inv-github" type="text" placeholder="carlos-dev" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+    </div>
+    <button id="inv-crear" type="button">Crear invitación</button>
+    <div class="estado mal" id="inv-error" hidden></div>
+    <div class="invitacion-lista" id="inv-lista" hidden>
+      <span class="explica" id="inv-para"></span>
+      <span class="grande" id="inv-codigo"></span>
+      <span class="explica">Sirve una vez y vence en 7 días. Mándasela por mensaje privado.</span>
+      <button id="inv-compartir" type="button">Compartir invitación</button>
+    </div>
+    <h3>Teléfonos</h3>
+    <div id="equipo-telefonos"></div>
+    <div id="equipo-pendientes-caja" hidden>
+      <h3 style="margin-bottom:6px">Invitaciones sin usar</h3>
+      <div id="equipo-pendientes"></div>
     </div>
   </section>
 
   <section class="tarjeta">
     <h2>Este teléfono</h2>
-    <p class="explica" id="nombre-telefono"></p>
+    <p class="explica" id="perfil"></p>
+    <button id="probar" type="button" class="secundario">Mandarme un aviso de prueba</button>
+    <details class="bloque" style="border:1px solid var(--linea); border-radius:12px">
+      <summary><span class="izq">Conectar mi PC para los avisos de Claude</span></summary>
+      <div style="padding:0 16px 14px; display:flex; flex-direction:column; gap:10px">
+        <ol class="pasos">
+          <li>Copia este código y mándatelo a la PC.</li>
+          <li>En la PC (con Evolve Alerts instalado) escribe en la terminal:</li>
+        </ol>
+        <code class="cmd">evolve-alerts pegar</code>
+        <label class="campo" for="codigo">Código de este teléfono (es personal, no lo compartas)
+          <textarea id="codigo" readonly></textarea>
+        </label>
+        <div class="fila">
+          <button id="compartir" type="button">Enviar a mi PC</button>
+          <button id="copiar" class="secundario" type="button">Copiar</button>
+        </div>
+      </div>
+    </details>
     <div class="fila">
-      <button id="ver-registro" class="secundario" type="button">Ver mi código de teléfono</button>
       <button id="borrar" class="secundario" type="button">Borrar historial</button>
+      <button id="baja" class="peligro" type="button">Dejar de recibir avisos</button>
     </div>
     <p class="explica">El historial se guarda sólo en este teléfono y se borra solo a los 30 días.</p>
   </section>
 </section>
 
-<!-- ═════════════ DETALLE DE UN AVISO ═════════════ -->
+<!-- ═════════════ DETALLE ═════════════ -->
 <div class="velo" id="velo" hidden>
   <div class="hoja" role="dialog" aria-modal="true" aria-labelledby="det-titulo">
     <div class="asa"></div>
@@ -331,14 +434,18 @@
   </div>
 </div>
 
+<div class="brindis" id="brindis" role="status" aria-live="polite" hidden></div>
 </main>
 
-<!-- ═════════════ BARRA DE ABAJO ═════════════ -->
+<!-- ═════════════ BARRA ═════════════ -->
 <nav class="barra" id="barra" hidden aria-label="Secciones">
   <div class="dentro">
     <button type="button" data-ir="avisos" aria-current="page">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
       Avisos</button>
+    <button type="button" data-ir="sereno">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      Sereno<span class="punto" id="punto-sereno" hidden></span></button>
     <button type="button" data-ir="resumen">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3v18h18"/><path d="M7 16v-5"/><path d="M12 16V8"/><path d="M17 16v-8"/></svg>
       Resumen</button>
@@ -351,28 +458,36 @@
 <script src="historial.js"></script>
 <script>
 const LLAVE_PUBLICA = 'BNUvOsxj2KfuEPleOp46DX_1iU0cxPmxDDw4ObwvnVVVquwtF9-g03ppLCURFgpVM4kilXIMt1yDDyAXzG-cY4o';
+// El servidor de Evolve Alerts (devcloud). Para probar contra otro: localStorage 'evolve-alerts-servidor'.
+const SERVIDOR = localStorage.getItem('evolve-alerts-servidor') || 'https://167-86-121-233.sslip.io';
+const APP = 'https://robertoojeda99.github.io/evolve-alerts/';
 const $ = (id) => document.getElementById(id);
 const esIOS = /iphone|ipad|ipod/i.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 const instalada = window.matchMedia('(display-mode: standalone)').matches || navigator.standalone === true;
 const hayPush = 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
 
-/* Ajustes por defecto. La PC tiene la misma tabla; si cambias una, cambia la otra (evolve-alerts.mjs). */
+/* Ajustes por defecto. El emisor tiene la misma tabla (evolve-alerts.mjs · AJUSTES_BASE): si cambias una, cambia la otra. */
 const AJUSTES_BASE = {
   v: 1,
-  claude: { terminar: true, minSegundos: 90, permisos: true },
+  claude: { activo: true, terminar: true, minSegundos: 90, permisos: true },
   carpetasSilencio: [],
-  github: { merge: true, cambios: true, comentarios: true, ci: true, deploy: true },
+  github: { activo: true, merge: true, cambios: true, comentarios: true, ci: true, deploy: true },
   suite: { libre: true },
+  sereno: { activo: true, apagados: [] },
   noMolestar: { activo: false, desde: '21:00', hasta: '08:00', permisos: true },
 };
 
 let registrada = false;
+let suscripcion = null;
+let perfilActual = null;
 let filtroDias = 'hoy';
+let filtroServicio = 'todos';
 let periodo = 'hoy';
 let cacheAvisos = [];
+let cacheSereno = null;
 
 /* ─── utilidades ─── */
-const guardado = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch {} return null; };
+const guardado = (k, v) => { try { if (v === undefined) return localStorage.getItem(k); if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch {} return null; };
 function aBytes(b64) {
   const relleno = '='.repeat((4 - b64.length % 4) % 4);
   const bin = atob((b64 + relleno).replace(/-/g, '+').replace(/_/g, '/'));
@@ -399,18 +514,25 @@ function duracion(seg, redondo) {
   if (m) return redondo ? `${m} min` : `${m} min${s ? ` ${s} s` : ''}`;
   return `${s} s`;
 }
+let brindisReloj = null;
+function brindis(texto) { const b = $('brindis'); b.textContent = texto; b.hidden = false; clearTimeout(brindisReloj); brindisReloj = setTimeout(() => { b.hidden = true; }, 2600); }
+
 const categoriaDe = (a) => a.categoria || ((a.evento === 'Notification' || /permiso/i.test(a.titulo || '')) ? 'permiso' : 'claude');
-const NOMBRE_CATEGORIA = { claude: 'Claude terminó', permiso: 'Pide permiso', github: 'GitHub', suite: 'Suite', prueba: 'Prueba' };
+// El símbolo de color va en la notificación; dentro de la app ya lo dice el ícono.
+const sinSimbolo = (t) => String(t || '').replace(/^(\[Prueba\] )?(🟠|🟣|🌙)\s*/u, '$1');
+const servicioDe = (cat) => (cat === 'permiso' ? 'claude' : cat);
+const NOMBRE_CATEGORIA = { claude: 'Claude terminó', permiso: 'Claude pide permiso', github: 'GitHub', sereno: 'Sereno', suite: 'Suite', prueba: 'Prueba' };
+const SVG = {
+  claude: '<path d="M12 3v3"/><path d="M12 18v3"/><path d="M3 12h3"/><path d="M18 12h3"/><path d="m5.6 5.6 2.1 2.1"/><path d="m16.3 16.3 2.1 2.1"/><path d="m5.6 18.4 2.1-2.1"/><path d="m16.3 7.7 2.1-2.1"/>',
+  permiso: '<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+  github: '<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/>',
+  sereno: '<path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="currentColor" stroke="none"/>',
+  suite: '<path d="M9 2v6l-5 9a2 2 0 0 0 1.7 3h12.6a2 2 0 0 0 1.7-3l-5-9V2"/><path d="M8 2h8"/>',
+  prueba: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>',
+};
 function iconoCategoria(cat) {
-  const svg = {
-    claude: '<path d="M20 6 9 17l-5-5"/>',
-    permiso: '<path d="M12 9v4"/><path d="M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
-    github: '<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M6 21V9a9 9 0 0 0 9 9"/>',
-    suite: '<path d="M9 2v6l-5 9a2 2 0 0 0 1.7 3h12.6a2 2 0 0 0 1.7-3l-5-9V2"/><path d="M8 2h8"/>',
-    prueba: '<path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/>',
-  }[cat] || '';
   const s = el('span', `icono-cat cat-${cat}`);
-  s.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${svg}</svg>`;
+  s.innerHTML = `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${SVG[cat] || ''}</svg>`;
   return s;
 }
 async function copiarTexto(t, boton) {
@@ -424,9 +546,21 @@ async function compartirTexto(titulo, t, botonCopiar) {
   copiarTexto(t, botonCopiar);
 }
 
+/* ─── servidor ─── */
+async function api(metodo, ruta, cuerpo) {
+  const sub = suscripcion && (suscripcion.toJSON ? suscripcion.toJSON() : suscripcion);
+  const headers = { 'content-type': 'application/json' };
+  if (sub) { headers['x-evolve-telefono'] = sub.endpoint; headers['x-evolve-llave'] = sub.keys.auth; }
+  const r = await fetch(SERVIDOR + ruta, { method: metodo, headers, body: cuerpo ? JSON.stringify(cuerpo) : undefined });
+  const datos = r.status === 204 ? null : await r.json().catch(() => null);
+  if (!r.ok) { const e = new Error((datos && datos.error) || `El servidor respondió ${r.status}`); e.status = r.status; throw e; }
+  return datos;
+}
+
 /* ─── navegación ─── */
+const SECCIONES = ['registro', 'avisos', 'sereno', 'resumen', 'ajustes'];
 function ir(seccion) {
-  for (const s of ['registro', 'avisos', 'resumen', 'ajustes']) $(`vista-${s}`).hidden = s !== seccion;
+  for (const s of SECCIONES) $(`vista-${s}`).hidden = s !== seccion;
   const conBarra = seccion !== 'registro' && registrada;
   $('barra').hidden = !conBarra;
   document.body.classList.toggle('sin-barra', !conBarra);
@@ -434,6 +568,7 @@ function ir(seccion) {
     if (b.dataset.ir === seccion) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
   });
   if (seccion === 'avisos') pintarAvisos();
+  if (seccion === 'sereno') pintarSereno(true);
   if (seccion === 'resumen') pintarResumen();
   if (seccion === 'ajustes') pintarAjustes();
   window.scrollTo(0, 0);
@@ -448,13 +583,15 @@ async function pintarAvisos() {
   const q = ($('buscar').value || '').trim().toLowerCase();
   const hoy = inicioDelDia(Date.now());
   let lista = filtroDias === 'hoy' ? todos.filter((a) => a.ts >= hoy) : todos;
+  if (filtroServicio !== 'todos') lista = lista.filter((a) => servicioDe(categoriaDe(a)) === filtroServicio);
   if (q) lista = lista.filter((a) => [a.titulo, a.cuerpo, a.completo, a.carpeta].join(' ').toLowerCase().includes(q));
 
   const cont = $('lista-avisos'); cont.replaceChildren();
   if (!lista.length) {
     const v = el('div', 'vacio');
-    v.append(el('b', null, q ? 'No encontré nada con esa búsqueda' : (filtroDias === 'hoy' ? 'Hoy no te ha llegado ningún aviso' : 'Todavía no hay avisos guardados')),
-             el('span', null, q ? 'Prueba con otra palabra, o busca en los últimos 30 días.' : 'Cuando Claude termine una tarea o pase algo en GitHub, aparecerá aquí.'));
+    const servicio = filtroServicio === 'todos' ? '' : ` de ${filtroServicio === 'claude' ? 'Claude' : filtroServicio === 'github' ? 'GitHub' : 'Sereno'}`;
+    v.append(el('b', null, q ? 'No encontré nada con esa búsqueda' : (filtroDias === 'hoy' ? `Hoy no te ha llegado ningún aviso${servicio}` : `No hay avisos${servicio} en los últimos 30 días`)),
+             el('span', null, q ? 'Prueba con otra palabra, o busca en los últimos 30 días.' : 'Cuando llegue uno, aparecerá aquí.'));
     cont.append(v); return;
   }
   let dia = null, ul = null;
@@ -468,13 +605,13 @@ async function pintarAvisos() {
     const cat = categoriaDe(a);
     const li = el('li');
     const b = el('button', 'aviso'); b.type = 'button';
-    b.setAttribute('aria-label', `${a.titulo}, ${hora(a.ts)}. Abrir completo.`);
+    b.setAttribute('aria-label', `${NOMBRE_CATEGORIA[cat] || cat}: ${a.titulo}, ${hora(a.ts)}. Abrir completo.`);
     b.append(iconoCategoria(cat));
-    const arriba = el('div', 'arriba'); arriba.append(el('span', 'titulo', a.titulo), el('span', 'hora', hora(a.ts)));
+    const arriba = el('div', 'arriba'); arriba.append(el('span', 'titulo', sinSimbolo(a.titulo)), el('span', 'hora', hora(a.ts)));
     b.append(arriba);
     if (a.cuerpo) b.append(el('div', 'cuerpo', a.cuerpo));
     const chips = el('div', 'chips');
-    chips.append(el('span', 'chip', NOMBRE_CATEGORIA[cat] || cat));
+    chips.append(el('span', `chip c-${cat}`, NOMBRE_CATEGORIA[cat] || cat));
     if (a.carpeta) chips.append(el('span', 'chip', a.carpeta));
     b.append(chips);
     b.addEventListener('click', () => abrirDetalle(a.id));
@@ -482,6 +619,11 @@ async function pintarAvisos() {
   }
 }
 $('buscar').addEventListener('input', () => pintarAvisos());
+document.querySelectorAll('#filtros button').forEach((b) => b.addEventListener('click', () => {
+  filtroServicio = b.dataset.filtro;
+  document.querySelectorAll('#filtros button').forEach((x) => x.setAttribute('aria-pressed', String(x === b)));
+  pintarAvisos();
+}));
 function elegirDias(f) {
   filtroDias = f;
   $('ver-hoy').setAttribute('aria-pressed', String(f === 'hoy'));
@@ -492,21 +634,23 @@ $('ver-hoy').addEventListener('click', () => elegirDias('hoy'));
 $('ver-todo').addEventListener('click', () => elegirDias('todo'));
 
 /* detalle */
-let enlaceActual = '';
+let accionDetalle = null;
 async function abrirDetalle(id) {
   let a = cacheAvisos.find((x) => String(x.id) === String(id));
   if (!a) { try { a = await Historial.uno(id); } catch {} }
   if (!a) return;
   const cat = categoriaDe(a);
-  $('det-titulo').textContent = a.titulo;
-  const chips = $('det-chips'); chips.replaceChildren(el('span', 'chip', NOMBRE_CATEGORIA[cat] || cat));
+  $('det-titulo').textContent = sinSimbolo(a.titulo);
+  const chips = $('det-chips'); chips.replaceChildren(el('span', `chip c-${cat}`, NOMBRE_CATEGORIA[cat] || cat));
   if (a.carpeta) chips.append(el('span', 'chip', a.carpeta));
   const partes = [`${nombreDia(a.ts)}, ${hora(a.ts)}`];
   if (a.segundos != null && cat === 'claude') partes.push(`trabajó ${duracion(a.segundos)}`);
   $('det-meta').textContent = partes.join(' · ');
   $('det-texto').textContent = a.completo || a.cuerpo || '(sin texto)';
-  enlaceActual = a.enlace || '';
-  $('det-enlace').hidden = !enlaceActual;
+  accionDetalle = null;
+  if (a.abrir === 'sereno' || cat === 'sereno') { accionDetalle = () => { cerrarDetalle(); ir('sereno'); }; $('det-enlace').textContent = 'Ver el detalle en Sereno'; }
+  else if (a.enlace) { accionDetalle = () => window.open(a.enlace, '_blank'); $('det-enlace').textContent = 'Abrir en GitHub'; }
+  $('det-enlace').hidden = !accionDetalle;
   $('velo').hidden = false;
   $('det-cerrar').focus();
 }
@@ -515,7 +659,84 @@ $('det-cerrar').addEventListener('click', cerrarDetalle);
 $('velo').addEventListener('click', (e) => { if (e.target === $('velo')) cerrarDetalle(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !$('velo').hidden) cerrarDetalle(); });
 $('det-copiar').addEventListener('click', () => copiarTexto($('det-texto').textContent, $('det-copiar')));
-$('det-enlace').addEventListener('click', () => { if (enlaceActual) window.open(enlaceActual, '_blank'); });
+$('det-enlace').addEventListener('click', () => { if (accionDetalle) accionDetalle(); });
+
+/* ─── SERENO ─── */
+function sello(s) {
+  const horas = (Date.now() - Date.parse(s.fecha)) / 3600e3;
+  if (horas > 30) return ['gris', 'No corrió anoche'];
+  if (s.generales.length) return ['mal', 'No se pudo revisar'];
+  if (s.nuevas.length) return ['mal', `${s.nuevas.length} ${s.nuevas.length === 1 ? 'falla nueva' : 'fallas nuevas'}`];
+  if (s.persisten.length) return ['aviso', `${s.persisten.length} ${s.persisten.length === 1 ? 'falla sigue' : 'fallas siguen'}`];
+  return ['bien', 'Todo sereno'];
+}
+function medidor(titulo, bien, total) {
+  const m = el('div', 'medidor');
+  const t = el('span'); t.append(el('b', null, `${bien} de ${total}`), ` ${titulo}`);
+  const pista = el('div', 'pista'); const r = el('div', `relleno${bien < total ? ' con-fallas' : ''}`);
+  r.style.width = `${total ? Math.round((bien / total) * 100) : 0}%`; pista.append(r);
+  m.append(t, pista); return m;
+}
+function bloque(titulo, items, color, pintar, abierto) {
+  const d = el('details', 'bloque'); if (abierto) d.open = true;
+  const s = el('summary'); const izq = el('span', 'izq', titulo);
+  s.append(izq, el('span', `cuantos ${color}`, String(items.length)));
+  const ul = el('ul', 'renglones'); items.forEach((x) => ul.append(pintar(x)));
+  d.append(s, ul); return d;
+}
+const renglonFalla = (p) => { const li = el('li'); li.append(el('b', null, p.nombre), el('code', null, p.ruta)); if (p.detalle) li.append(el('pre', null, p.detalle)); return li; };
+const renglonSimple = (p) => { const li = el('li'); li.append(el('b', null, p.nombre), el('code', null, p.ruta)); return li; };
+const renglonPr = (p) => { const li = el('li'); li.append(el('b', null, p.titulo), el('code', null, `${p.fecha} · ${p.hash}`)); return li; };
+
+async function pintarSereno(recargar) {
+  const cont = $('sereno-sistemas');
+  if (recargar || !cacheSereno) {
+    if (!cacheSereno) cont.replaceChildren(el('div', 'vacio', 'Cargando cómo amanecieron los sistemas…'));
+    try { cacheSereno = (await api('GET', '/v1/sereno')).sistemas; guardado('evolve-alerts-sereno', JSON.stringify(cacheSereno)); }
+    catch (e) {
+      try { cacheSereno = JSON.parse(guardado('evolve-alerts-sereno') || 'null'); } catch {}
+      if (!cacheSereno) { const v = el('div', 'vacio'); v.append(el('b', null, 'No pude traer los resultados'), el('span', null, `${e.message}. Revisa tu conexión y toca Actualizar.`)); cont.replaceChildren(v); return; }
+      brindis('Sin conexión: te muestro lo último que vi');
+    }
+  }
+  cont.replaceChildren();
+  const apagados = leerAjustes().sereno.apagados;
+  const lista = [...cacheSereno].sort((a, b) => apagados.includes(a.sistema) - apagados.includes(b.sistema));
+  if (!lista.length) { const v = el('div', 'vacio'); v.append(el('b', null, 'Sereno todavía no ha corrido'), el('span', null, 'Después de su primera noche, aquí verás cada sistema.')); cont.append(v); }
+
+  // La franja de arriba: la noche en una línea.
+  const conFalla = lista.filter((s) => ['mal', 'gris'].includes(sello(s)[0]));
+  const noche = $('sereno-noche');
+  if (lista.length) {
+    const ultima = lista.reduce((m, s) => (Date.parse(s.fecha) > m ? Date.parse(s.fecha) : m), 0);
+    noche.replaceChildren(el('b', null, conFalla.length ? (lista.length === 1 ? 'Necesita atención' : `${conFalla.length} de ${lista.length} sistemas ${conFalla.length === 1 ? 'necesita' : 'necesitan'} atención`) : lista.length === 1 ? 'Todo sereno' : `Los ${lista.length} sistemas, todo sereno`),
+      el('span', null, `Última revisión: ${nombreDia(ultima).toLowerCase()}, ${hora(ultima)}`));
+    noche.hidden = false;
+  } else noche.hidden = true;
+  $('punto-sereno').hidden = !conFalla.length;
+
+  for (const s of lista) {
+    const [tono, texto] = sello(s);
+    const card = el('article', 'sistema');
+    if (apagados.includes(s.sistema)) card.style.opacity = '.6';
+    const enc = el('div', 'encabezado');
+    const fila = el('div', 'nombre-fila'); fila.append(el('h2', null, s.nombre), el('span', `sello ${tono}`, texto));
+    const meta = `${nombreDia(Date.parse(s.fecha))}, ${hora(Date.parse(s.fecha))}${s.duracionMin ? ` · recorrido de ${s.duracionMin} min` : ''}${apagados.includes(s.sistema) ? ' · sin aviso (lo apagaste)' : ''}`;
+    enc.append(fila, el('span', 'meta', meta));
+    const med = el('div', 'medidores'); med.append(medidor('pantallas', s.sanas, s.total));
+    if (s.pasos) med.append(medidor('pasos de flujo', s.pasosBien, s.pasos));
+    enc.append(med);
+    card.append(enc);
+    if (s.generales.length) card.append(bloque('No se pudo recorrer', s.generales, 'rojo', renglonFalla, true));
+    if (s.nuevas.length) card.append(bloque('Fallas nuevas', s.nuevas, 'rojo', renglonFalla, true));
+    if (s.persisten.length) card.append(bloque('Siguen de antes', s.persisten, 'ambar', renglonFalla, false));
+    if (s.resueltas.length) card.append(bloque('Arregladas', s.resueltas, 'verde', renglonSimple, false));
+    if (s.prs.length) card.append(bloque('Cambios que entraron', s.prs, '', renglonPr, false));
+    else enc.append(el('span', 'meta', 'No entró ningún cambio desde la noche anterior.'));
+    cont.append(card);
+  }
+}
+$('sereno-recargar').addEventListener('click', () => pintarSereno(true));
 
 /* ─── RESUMEN ─── */
 async function pintarResumen() {
@@ -564,7 +785,7 @@ async function pintarResumen() {
   if (prs.length) {
     const t = el('section', 'tarjeta');
     t.append(el('h2', null, 'PRs mencionados'), el('p', 'explica', 'Números de PR que aparecieron en tus avisos.'));
-    const c = el('div', 'chips'); prs.slice(0, 30).forEach((p) => c.append(el('span', 'chip', p)));
+    const c = el('div', 'chips'); prs.slice(0, 30).forEach((p) => c.append(el('span', 'chip c-github', p)));
     t.append(c); cont.append(t);
   }
 
@@ -582,39 +803,73 @@ document.querySelectorAll('#vista-resumen .segmentos button').forEach((b) => b.a
   pintarResumen();
 }));
 
-/* ─── AJUSTES ─── */
-function leerAjustes() {
-  let a = {}; try { a = JSON.parse(guardado('evolve-alerts-ajustes') || '{}'); } catch {}
+/* ─── AJUSTES (se guardan solos en el servidor) ─── */
+function completar(a) {
   const b = JSON.parse(JSON.stringify(AJUSTES_BASE));
+  a = a || {};
   return { ...b, ...a, claude: { ...b.claude, ...a.claude }, github: { ...b.github, ...a.github }, suite: { ...b.suite, ...a.suite },
+           sereno: { ...b.sereno, ...a.sereno, apagados: (a.sereno && a.sereno.apagados) || [] },
            noMolestar: { ...b.noMolestar, ...a.noMolestar }, carpetasSilencio: a.carpetasSilencio || [] };
 }
+function leerAjustes() { let a = {}; try { a = JSON.parse(guardado('evolve-alerts-ajustes') || '{}'); } catch {} return completar(a); }
 let ajustes = leerAjustes();
-const marcarPendiente = () => { guardado('evolve-alerts-ajustes-pendiente', '1'); $('cambios-pendientes').hidden = false; };
 
+function estadoGuardado(texto, tono) { const g = $('guardado'); g.textContent = texto; g.className = `guardado${tono ? ' ' + tono : ''}`; }
+let relojGuardar = null;
+function guardarAjustes() {
+  guardado('evolve-alerts-ajustes', JSON.stringify(ajustes));
+  guardado('evolve-alerts-ajustes-pendiente', '1');
+  estadoGuardado('Guardando…');
+  clearTimeout(relojGuardar);
+  relojGuardar = setTimeout(subirAjustes, 500);
+}
+async function subirAjustes() {
+  if (guardado('evolve-alerts-ajustes-pendiente') !== '1') return;
+  try {
+    await api('PUT', '/v1/yo/ajustes', { ajustes: leerAjustes() });
+    guardado('evolve-alerts-ajustes-pendiente', '0');
+    estadoGuardado('✓ Guardado', 'ok');
+  } catch {
+    estadoGuardado('Sin conexión: se guardará al volver', 'mal');
+  }
+}
+window.addEventListener('online', subirAjustes);
+
+function pintarGrupos() {
+  $('grupo-claude').setAttribute('aria-disabled', String(!ajustes.claude.activo));
+  $('grupo-gh').setAttribute('aria-disabled', String(!ajustes.github.activo));
+  $('grupo-sereno').setAttribute('aria-disabled', String(!ajustes.sereno.activo));
+  $('fila-min').setAttribute('aria-disabled', String(!ajustes.claude.terminar));
+  $('fila-nm').setAttribute('aria-disabled', String(!ajustes.noMolestar.activo));
+}
 function pintarAjustes() {
   ajustes = leerAjustes();
+  for (const [id, cat] of [['titulo-claude', 'claude'], ['titulo-github', 'github'], ['titulo-sereno', 'sereno']]) {
+    const t = $(id); if (!t.querySelector('.icono-cat')) t.prepend(iconoCategoria(cat));
+  }
+  $('aj-claude-activo').checked = ajustes.claude.activo;
   $('aj-claude').checked = ajustes.claude.terminar;
   $('aj-min').value = String(ajustes.claude.minSegundos);
   $('aj-permisos').checked = ajustes.claude.permisos;
-  $('aj-gh-merge').checked = ajustes.github.merge;
-  $('aj-gh-cambios').checked = ajustes.github.cambios;
-  $('aj-gh-comentarios').checked = ajustes.github.comentarios;
-  $('aj-gh-ci').checked = ajustes.github.ci;
-  $('aj-gh-deploy').checked = ajustes.github.deploy;
+  $('aj-gh-activo').checked = ajustes.github.activo;
+  for (const k of ['merge', 'cambios', 'comentarios', 'ci', 'deploy']) $(`aj-gh-${k}`).checked = ajustes.github[k];
+  $('aj-sereno').checked = ajustes.sereno.activo;
   $('aj-suite').checked = ajustes.suite.libre;
   $('aj-nm').checked = ajustes.noMolestar.activo;
   $('aj-nm-desde').value = ajustes.noMolestar.desde;
   $('aj-nm-hasta').value = ajustes.noMolestar.hasta;
   $('aj-nm-permisos').checked = ajustes.noMolestar.permisos;
-  $('fila-min').setAttribute('aria-disabled', String(!ajustes.claude.terminar));
-  $('fila-nm').setAttribute('aria-disabled', String(!ajustes.noMolestar.activo));
-  $('cambios-pendientes').hidden = guardado('evolve-alerts-ajustes-pendiente') !== '1';
-  $('nombre-telefono').textContent = `Nombre: ${guardado('evolve-alerts-nombre') || 'sin nombre'}`;
+  pintarGrupos();
+  if (guardado('evolve-alerts-ajustes-pendiente') === '1') { estadoGuardado('Sin guardar todavía', 'mal'); subirAjustes(); } else estadoGuardado('');
 
-  const carpetas = [...new Set([...cacheAvisos.filter((a) => categoriaDe(a) !== 'github').map((a) => a.carpeta).filter(Boolean), ...ajustes.carpetasSilencio])].sort();
+  const p = perfilActual;
+  $('perfil').textContent = p ? `${p.nombre}${p.github ? ` · GitHub @${p.github}` : ''}${p.admin ? ' · administrador' : ''}` : '';
+  $('gh-explica').textContent = p && p.github ? `Se revisan los PRs de @${p.github} cada 3 minutos, aunque tu PC esté apagada.` : 'Se revisan tus PRs cada 3 minutos, aunque tu PC esté apagada.';
+
+  // Carpetas
+  const carpetas = [...new Set([...cacheAvisos.filter((a) => servicioDe(categoriaDe(a)) === 'claude').map((a) => a.carpeta).filter(Boolean), ...ajustes.carpetasSilencio])].sort();
   const cont = $('aj-carpetas'); cont.replaceChildren();
-  if (!carpetas.length) cont.append(el('span', 'explica', 'Todavía no hay carpetas. Aparecerán cuando te lleguen avisos.'));
+  if (!carpetas.length) cont.append(el('span', 'explica', 'Aparecerán cuando te lleguen avisos de Claude.'));
   for (const c of carpetas) {
     const b = el('button', null, c); b.type = 'button';
     const silencio = ajustes.carpetasSilencio.includes(c);
@@ -623,71 +878,165 @@ function pintarAjustes() {
     b.addEventListener('click', () => {
       const i = ajustes.carpetasSilencio.indexOf(c);
       if (i >= 0) ajustes.carpetasSilencio.splice(i, 1); else ajustes.carpetasSilencio.push(c);
-      guardarLocal(); pintarAjustes();
+      guardarAjustes(); pintarAjustes();
     });
     cont.append(b);
   }
+  pintarSistemasSereno();
+  if (p && p.admin) { $('equipo').hidden = false; pintarEquipo(); }
 }
-function guardarLocal() { guardado('evolve-alerts-ajustes', JSON.stringify(ajustes)); marcarPendiente(); }
+async function pintarSistemasSereno() {
+  if (!cacheSereno) { try { cacheSereno = (await api('GET', '/v1/sereno')).sistemas; } catch { try { cacheSereno = JSON.parse(guardado('evolve-alerts-sereno') || 'null'); } catch {} } }
+  const cont = $('aj-sereno-sistemas'); cont.replaceChildren();
+  if (!cacheSereno || !cacheSereno.length) { cont.append(el('span', 'explica', 'Aparecerán después de la primera noche de Sereno.')); return; }
+  for (const s of cacheSereno) {
+    const o = el('div', 'opcion');
+    const txt = el('div', 'txt'); txt.append(el('b', null, s.nombre));
+    const lab = el('label', 'interruptor'); const i = el('input'); i.type = 'checkbox'; i.id = `aj-sereno-${s.sistema}`;
+    i.setAttribute('aria-label', `Aviso de Sereno para ${s.nombre}`);
+    i.checked = !ajustes.sereno.apagados.includes(s.sistema);
+    i.addEventListener('change', () => {
+      const ap = new Set(ajustes.sereno.apagados); if (i.checked) ap.delete(s.sistema); else ap.add(s.sistema);
+      ajustes.sereno.apagados = [...ap]; guardarAjustes();
+    });
+    lab.append(i, el('span', 'pista')); o.append(txt, lab); cont.append(o);
+  }
+}
 function leerFormulario() {
-  ajustes.claude.terminar = $('aj-claude').checked;
-  ajustes.claude.minSegundos = Number($('aj-min').value);
-  ajustes.claude.permisos = $('aj-permisos').checked;
-  ajustes.github = { merge: $('aj-gh-merge').checked, cambios: $('aj-gh-cambios').checked, comentarios: $('aj-gh-comentarios').checked,
-                     ci: $('aj-gh-ci').checked, deploy: $('aj-gh-deploy').checked };
+  ajustes.claude = { ...ajustes.claude, activo: $('aj-claude-activo').checked, terminar: $('aj-claude').checked,
+                     minSegundos: Number($('aj-min').value), permisos: $('aj-permisos').checked };
+  ajustes.github = { activo: $('aj-gh-activo').checked, merge: $('aj-gh-merge').checked, cambios: $('aj-gh-cambios').checked,
+                     comentarios: $('aj-gh-comentarios').checked, ci: $('aj-gh-ci').checked, deploy: $('aj-gh-deploy').checked };
+  ajustes.sereno = { ...ajustes.sereno, activo: $('aj-sereno').checked };
   ajustes.suite.libre = $('aj-suite').checked;
   ajustes.noMolestar = { activo: $('aj-nm').checked, desde: $('aj-nm-desde').value || '21:00', hasta: $('aj-nm-hasta').value || '08:00',
                          permisos: $('aj-nm-permisos').checked };
-  guardarLocal();
-  $('fila-min').setAttribute('aria-disabled', String(!ajustes.claude.terminar));
-  $('fila-nm').setAttribute('aria-disabled', String(!ajustes.noMolestar.activo));
+  pintarGrupos();
+  guardarAjustes();
 }
-document.querySelectorAll('#vista-ajustes input, #vista-ajustes select').forEach((i) => i.addEventListener('change', leerFormulario));
-$('guardar').addEventListener('click', () => {
-  leerFormulario();
-  $('codigo-ajustes').value = aCodigo({ tipo: 'ajustes', ajustes });
-  $('codigo-ajustes-caja').hidden = false;
-  $('codigo-ajustes-caja').scrollIntoView({ behavior: 'smooth', block: 'start' });
+['aj-claude-activo', 'aj-claude', 'aj-min', 'aj-permisos', 'aj-gh-activo', 'aj-gh-merge', 'aj-gh-cambios', 'aj-gh-comentarios', 'aj-gh-ci', 'aj-gh-deploy',
+ 'aj-sereno', 'aj-suite', 'aj-nm', 'aj-nm-desde', 'aj-nm-hasta', 'aj-nm-permisos'].forEach((id) => $(id).addEventListener('change', leerFormulario));
+
+/* este teléfono */
+$('probar').addEventListener('click', async () => {
+  $('probar').disabled = true;
+  try { const r = await api('POST', '/v1/yo/prueba'); brindis(r.enviados ? 'Aviso de prueba enviado: debe llegarte en segundos' : 'No se pudo mandar'); }
+  catch (e) { brindis(e.message); } finally { $('probar').disabled = false; }
 });
-const ajustesEnviados = () => { guardado('evolve-alerts-ajustes-pendiente', '0'); $('cambios-pendientes').hidden = true; };
-$('copiar-ajustes').addEventListener('click', () => { copiarTexto($('codigo-ajustes').value, $('copiar-ajustes')); ajustesEnviados(); });
-$('compartir-ajustes').addEventListener('click', () => { compartirTexto('Ajustes de Evolve Alerts', $('codigo-ajustes').value, $('copiar-ajustes')); ajustesEnviados(); });
-$('ver-registro').addEventListener('click', () => { ir('registro'); $('ir-avisos').hidden = false; });
+function pintarCodigoPc() {
+  if (!suscripcion) return;
+  const sub = suscripcion.toJSON ? suscripcion.toJSON() : suscripcion;
+  $('codigo').value = aCodigo({ nombre: perfilActual ? perfilActual.nombre : 'mi teléfono', suscripcion: sub });
+}
+$('copiar').addEventListener('click', () => copiarTexto($('codigo').value, $('copiar')));
+$('compartir').addEventListener('click', () => compartirTexto('Código de Evolve Alerts', $('codigo').value, $('copiar')));
 $('borrar').addEventListener('click', async () => {
   if (!confirm('¿Borrar todos los avisos guardados en este teléfono?')) return;
   await Historial.borrarTodo(); await marcarLeido(); cacheAvisos = []; ir('avisos');
 });
+$('baja').addEventListener('click', async () => {
+  if (!confirm('¿Dejar de recibir avisos en este teléfono? Para volver vas a necesitar una invitación nueva.')) return;
+  try { await api('DELETE', '/v1/yo'); } catch {}
+  try { if (suscripcion) await suscripcion.unsubscribe(); } catch {}
+  guardado('evolve-alerts-perfil', null); registrada = false; perfilActual = null;
+  $('paso-activar').hidden = false; ir('registro'); estado('Este teléfono ya no recibe avisos.', 'ok');
+});
+
+/* equipo (sólo administradores) */
+let ultimaInvitacion = null;
+async function pintarEquipo() {
+  let datos;
+  try { datos = await api('GET', '/v1/equipo'); } catch (e) { $('equipo-telefonos').replaceChildren(el('span', 'explica', e.message)); return; }
+  const tel = $('equipo-telefonos'); tel.replaceChildren();
+  for (const t of datos.telefonos) {
+    const f = el('div', 'persona'); const txt = el('div', 'txt');
+    txt.append(el('b', null, `${t.nombre}${t.tu ? ' (tú)' : ''}`),
+               el('span', null, [t.github ? `@${t.github}` : 'sin GitHub', t.admin ? 'administrador' : '', t.alta ? `desde ${new Date(t.alta).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}` : ''].filter(Boolean).join(' · ')));
+    f.append(txt);
+    if (!t.tu) {
+      const b = el('button', 'peligro chico', 'Quitar'); b.type = 'button';
+      b.addEventListener('click', async () => {
+        if (!confirm(`¿Quitar a ${t.nombre}? Dejará de recibir avisos.`)) return;
+        try { await api('DELETE', `/v1/equipo/${t.id}`); brindis(`${t.nombre} ya no recibe avisos`); pintarEquipo(); } catch (e) { brindis(e.message); }
+      });
+      f.append(b);
+    }
+    tel.append(f);
+  }
+  const pend = $('equipo-pendientes'); pend.replaceChildren();
+  $('equipo-pendientes-caja').hidden = !datos.invitaciones.length;
+  for (const i of datos.invitaciones) {
+    const f = el('div', 'persona'); const txt = el('div', 'txt');
+    txt.append(el('b', null, i.nombre), el('span', null, `${formatoCodigo(i.codigo)} · vence ${new Date(i.vence).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}`));
+    const b = el('button', 'secundario chico', 'Cancelar'); b.type = 'button';
+    b.addEventListener('click', async () => { try { await api('DELETE', `/v1/invitaciones/${i.codigo}`); pintarEquipo(); } catch (e) { brindis(e.message); } });
+    f.append(txt, b); pend.append(f);
+  }
+}
+const formatoCodigo = (c) => `${c.slice(0, 4)}-${c.slice(4)}`;
+$('inv-crear').addEventListener('click', async () => {
+  $('inv-error').hidden = true; $('inv-crear').disabled = true;
+  try {
+    const i = await api('POST', '/v1/invitaciones', { nombre: $('inv-nombre').value, github: $('inv-github').value });
+    ultimaInvitacion = { ...i, nombre: $('inv-nombre').value.trim() };
+    $('inv-para').textContent = `Invitación para ${ultimaInvitacion.nombre}`;
+    $('inv-codigo').textContent = formatoCodigo(i.codigo);
+    $('inv-lista').hidden = false;
+    $('inv-nombre').value = ''; $('inv-github').value = '';
+    pintarEquipo();
+  } catch (e) { $('inv-error').textContent = e.message; $('inv-error').hidden = false; }
+  finally { $('inv-crear').disabled = false; }
+});
+$('inv-compartir').addEventListener('click', () => {
+  if (!ultimaInvitacion) return;
+  const texto = `Hola ${ultimaInvitacion.nombre}, te invito a Evolve Alerts, la app de avisos del equipo.\n\n`
+    + `1. Abre ${ultimaInvitacion.enlace}\n   (iPhone: en Safari · Android: en Chrome)\n`
+    + `2. Ponla en tu pantalla de inicio y ábrela desde el ícono.\n`
+    + `3. Escribe este código: ${formatoCodigo(ultimaInvitacion.codigo)}\n\n`
+    + `Sirve una vez y vence en 7 días. No lo compartas.`;
+  compartirTexto('Invitación a Evolve Alerts', texto, $('inv-compartir'));
+});
 
 /* ─── REGISTRO ─── */
 function estado(texto, tipo) { const e = $('estado'); e.hidden = false; e.textContent = texto; e.className = 'estado' + (tipo ? ' ' + tipo : ''); }
-function mostrarCodigo(sub) {
-  const nombre = ($('nombre').value || '').trim() || 'mi teléfono';
-  $('codigo').value = aCodigo({ nombre, suscripcion: sub.toJSON ? sub.toJSON() : sub });
-  $('paso-codigo').hidden = false;
-  guardado('evolve-alerts-nombre', nombre);
-}
+$('invitacion').addEventListener('input', () => {
+  const c = $('invitacion').value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 8);
+  $('invitacion').value = c.length > 4 ? `${c.slice(0, 4)}-${c.slice(4)}` : c;
+});
 $('activar').addEventListener('click', async () => {
+  const codigo = $('invitacion').value.replace(/[^A-Z0-9]/gi, '');
+  if (codigo.length !== 8) { estado('Escribe las 8 letras y números de tu código de invitación.', 'mal'); $('invitacion').focus(); return; }
   $('activar').disabled = true;
   try {
     const permiso = await Notification.requestPermission();
     if (permiso !== 'granted') {
-      estado('No diste permiso. Actívalo en Ajustes del iPhone, Notificaciones, Evolve Alerts, y vuelve a tocar el botón.', 'mal');
+      estado(esIOS ? 'No diste permiso. Actívalo en Ajustes del iPhone → Notificaciones → Evolve Alerts y vuelve a tocar el botón.'
+                   : 'No diste permiso. Actívalo en los permisos del navegador y vuelve a tocar el botón.', 'mal');
       return;
     }
+    estado('Conectando…');
     const registro = await navigator.serviceWorker.ready;
     let sub = await registro.pushManager.getSubscription();
     if (!sub) sub = await registro.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: aBytes(LLAVE_PUBLICA) });
-    registrada = true;
-    estado('Listo, este teléfono ya puede recibir avisos.', 'ok');
-    mostrarCodigo(sub);
-    $('ir-avisos').hidden = false;
+    suscripcion = sub;
+    const perfil = await api('POST', '/v1/registro', { invitacion: codigo, suscripcion: sub.toJSON(), ajustes: leerAjustes() });
+    entrar(perfil);
+    ir('avisos');
+    brindis(`¡Listo, ${perfil.nombre}! Ya te llegan los avisos`);
   } catch (e) {
-    estado('No se pudo activar: ' + (e && e.message ? e.message : e), 'mal');
+    estado(e.status ? e.message : `No se pudo activar: ${e.message || e}. Revisa tu conexión.`, 'mal');
   } finally { $('activar').disabled = false; }
 });
-$('copiar').addEventListener('click', () => copiarTexto($('codigo').value, $('copiar')));
-$('compartir').addEventListener('click', () => compartirTexto('Código de Evolve Alerts', $('codigo').value, $('copiar')));
-$('ir-avisos').addEventListener('click', () => ir('avisos'));
+
+function entrar(perfil) {
+  perfilActual = perfil;
+  registrada = true;
+  guardado('evolve-alerts-perfil', JSON.stringify(perfil));
+  // El servidor manda; lo que haya pendiente en el teléfono se sube después.
+  if (guardado('evolve-alerts-ajustes-pendiente') !== '1') guardado('evolve-alerts-ajustes', JSON.stringify(perfil.ajustes || {}));
+  ajustes = leerAjustes();
+  pintarCodigoPc();
+}
 
 /* ─── arranque ─── */
 async function marcarLeido() {
@@ -695,11 +1044,14 @@ async function marcarLeido() {
   try { if (navigator.clearAppBadge) await navigator.clearAppBadge(); } catch {}
 }
 function abrirDesdeHash() {
+  if (!registrada) return;
+  if (location.hash === '#sereno') { ir('sereno'); history.replaceState(null, '', location.pathname); return; }
   const m = location.hash.match(/^#aviso-(\d+)$/);
-  if (m && registrada) { ir('avisos'); abrirDetalle(m[1]); }
+  if (m) { ir('avisos'); abrirDetalle(m[1]); }
 }
 async function iniciar() {
-  $('nombre').value = guardado('evolve-alerts-nombre') || '';
+  const deEnlace = new URLSearchParams(location.search).get('invitacion');
+  if (deEnlace) { $('invitacion').value = deEnlace; $('invitacion').dispatchEvent(new Event('input')); }
   if (esIOS && !instalada) { ir('registro'); $('paso-instalar').hidden = false; return; }
   if (!hayPush) {
     ir('registro'); $('sin-soporte').hidden = false;
@@ -708,21 +1060,31 @@ async function iniciar() {
       : 'Prueba con Chrome en Android, o con Safari en iPhone desde la pantalla de inicio.';
     return;
   }
-  $('paso-activar').hidden = false;
   const registro = await navigator.serviceWorker.register('sw.js');
   registro.update().catch(() => {});
-  const actual = await registro.pushManager.getSubscription();
-  registrada = !!(actual && Notification.permission === 'granted');
+  suscripcion = await registro.pushManager.getSubscription();
+  if (suscripcion && Notification.permission === 'granted') {
+    try {
+      entrar(await api('GET', '/v1/yo'));
+    } catch (e) {
+      if (e.status === 401) { guardado('evolve-alerts-perfil', null); }
+      else {
+        // Sin conexión: si ya estaba dado de alta, entra con lo último que se supo.
+        let p = null; try { p = JSON.parse(guardado('evolve-alerts-perfil') || 'null'); } catch {}
+        if (p) { perfilActual = p; registrada = true; pintarCodigoPc(); }
+      }
+    }
+  }
   if (registrada) {
-    estado('Los avisos están activos en este teléfono.', 'ok');
-    $('activar').textContent = 'Volver a generar el código';
-    mostrarCodigo(actual);
     await cargar();
     ir('avisos');
     marcarLeido();
     abrirDesdeHash();
+    pintarSereno(true).catch(() => {}); // para el puntito rojo de la pestaña
   } else {
+    $('paso-activar').hidden = false;
     ir('registro');
+    if (suscripcion) estado('Este teléfono todavía no está dado de alta. Escribe tu código de invitación.');
   }
 }
 if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('message', (e) => {
@@ -730,16 +1092,17 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.addEventListener('mess
   if (e.data.tipo === 'nuevo-aviso') {
     if (!$('vista-avisos').hidden) pintarAvisos();
     if (!$('vista-resumen').hidden) pintarResumen();
+    if (!$('vista-sereno').hidden) pintarSereno(true);
     if (!document.hidden) marcarLeido();
   }
   if (e.data.tipo === 'abrir') { location.hash = new URL(e.data.url).hash; abrirDesdeHash(); }
 });
 window.addEventListener('hashchange', abrirDesdeHash);
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden && registrada) { if (!$('vista-avisos').hidden) pintarAvisos(); marcarLeido(); }
+  if (!document.hidden && registrada) { if (!$('vista-avisos').hidden) pintarAvisos(); marcarLeido(); subirAjustes(); }
 });
 
-iniciar().catch((e) => { ir('registro'); estado('Error al iniciar: ' + e.message, 'mal'); });
+iniciar().catch((e) => { ir('registro'); $('paso-activar').hidden = false; estado('Error al iniciar: ' + e.message, 'mal'); });
 </script>
 </body>
 </html>

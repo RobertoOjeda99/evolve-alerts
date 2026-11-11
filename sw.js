@@ -8,7 +8,12 @@ self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 self.addEventListener('push', (evento) => {
   let datos = {};
   try { datos = evento.data ? evento.data.json() : {}; } catch { datos = { body: evento.data && evento.data.text() }; }
-  const titulo = datos.title || 'Evolve Alerts';
+  // El iPhone no deja pintar la notificación: cada servicio lleva su símbolo de color al inicio del título.
+  const SIMBOLO = { claude: '🟠', permiso: '🟠', github: '🟣', sereno: '🌙' };
+  const categoria = datos.categoria || 'claude';
+  const base = datos.title || 'Evolve Alerts';
+  const simbolo = SIMBOLO[categoria];
+  const titulo = simbolo && !base.includes(simbolo) ? `${simbolo} ${base}` : base;
   const cuerpo = datos.body || '';
 
   evento.waitUntil((async () => {
@@ -18,7 +23,8 @@ self.addEventListener('push', (evento) => {
       guardado = await Historial.guardar({
         titulo, cuerpo,
         completo: datos.completo || cuerpo,
-        categoria: datos.categoria || 'claude',
+        categoria,
+        abrir: datos.abrir || '',
         carpeta: datos.carpeta || '',
         evento: datos.evento || '',
         segundos: datos.segundos ?? null,
@@ -31,7 +37,7 @@ self.addEventListener('push', (evento) => {
       icon: 'iconos/icono-192.png',
       badge: 'iconos/insignia-96.png',
       tag: datos.tag || undefined,
-      data: { url: guardado.id ? `./#aviso-${guardado.id}` : './' },
+      data: { url: datos.abrir === 'sereno' ? './#sereno' : guardado.id ? `./#aviso-${guardado.id}` : './' },
     });
     // 3. El numerito rojo del ícono.
     try { if (guardado.sinLeer && self.navigator.setAppBadge) await self.navigator.setAppBadge(guardado.sinLeer); } catch {}
