@@ -36,7 +36,9 @@ self.addEventListener('push', (evento) => {
       body: cuerpo,
       icon: 'iconos/icono-192.png',
       badge: 'iconos/insignia-96.png',
-      tag: datos.tag || undefined,
+      // Con la misma etiqueta, el teléfono REEMPLAZA el aviso anterior sin sonar: los de Claude (uno por
+      // conversación) se volvían mudos después del primero. Sólo Sereno la usa, para no juntar mañanas.
+      tag: categoria === 'sereno' ? (datos.tag || undefined) : undefined,
       data: { url: datos.abrir === 'sereno' ? './#sereno' : guardado.id ? `./#aviso-${guardado.id}` : './' },
     });
     // 3. El numerito rojo del ícono.
