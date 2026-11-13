@@ -139,6 +139,11 @@
   .renglones li { display:flex; flex-direction:column; gap:3px; font-size:14px; }
   .renglones li b { font-weight:600; }
   .renglones code { font:12px ui-monospace, Menlo, monospace; color:var(--suave); overflow-wrap:anywhere; }
+  .explicacion { background:var(--sereno-suave); border-radius:10px; padding:10px 12px; display:flex; flex-direction:column; gap:6px; margin-top:4px; }
+  .explicacion p { margin:0; font-size:14px; }
+  .explicacion .sello { align-self:flex-start; }
+  .renglones a { font-size:13px; font-weight:600; color:var(--sereno); }
+  .renglones details summary { font-size:13px; color:var(--suave); cursor:pointer; }
   .renglones pre { margin:4px 0 0; white-space:pre-wrap; overflow-wrap:anywhere; font:12px/1.45 ui-monospace, Menlo, monospace; background:var(--fondo); border-radius:8px; padding:8px 10px; max-height:200px; overflow:auto; }
 
   /* resumen */
@@ -684,7 +689,22 @@ function bloque(titulo, items, color, pintar, abierto) {
   const ul = el('ul', 'renglones'); items.forEach((x) => ul.append(pintar(x)));
   d.append(s, ul); return d;
 }
-const renglonFalla = (p) => { const li = el('li'); li.append(el('b', null, p.nombre), el('code', null, p.ruta)); if (p.detalle) li.append(el('pre', null, p.detalle)); return li; };
+const renglonFalla = (p) => {
+  const li = el('li'); li.append(el('b', null, p.nombre), el('code', null, p.ruta));
+  const x = p.explicacion;
+  if (x) {
+    // La explicación en lenguaje claro (Claude Haiku 5.5) va antes que el error técnico.
+    const caja = el('div', 'explicacion');
+    caja.append(el('span', `sello ${x.gravedad === 'alta' ? 'mal' : x.gravedad === 'media' ? 'aviso' : 'gris'}`, `Gravedad ${x.gravedad}`));
+    caja.append(el('p', null, x.que_paso));
+    const c = el('p'); c.append(el('b', null, 'Causa probable: '), x.causa_probable); caja.append(c);
+    const d = el('p'); d.append(el('b', null, 'Por dónde empezar: '), x.donde_revisar); caja.append(d);
+    li.append(caja);
+  }
+  if (p.issue) { const a = el('a', null, 'Ver el issue en GitHub'); a.href = p.issue; a.target = '_blank'; a.rel = 'noopener'; li.append(a); }
+  if (p.detalle) { const det = el('details'); det.append(el('summary', null, 'Error técnico'), el('pre', null, p.detalle)); li.append(det); }
+  return li;
+};
 const renglonSimple = (p) => { const li = el('li'); li.append(el('b', null, p.nombre), el('code', null, p.ruta)); return li; };
 const renglonPr = (p) => { const li = el('li'); li.append(el('b', null, p.titulo), el('code', null, `${p.fecha} · ${p.hash}`)); return li; };
 
